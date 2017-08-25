@@ -1,17 +1,17 @@
 ### Ⅰ.开始使用Jetty
-<span id="开始使用jetty"></span>
+<span id="top"></span>
   - 1. [关于Jetty的介绍](#1关于jetty的介绍)
     - [什么是Jetty](#11什么是jetty)
     - [我应该使用哪个版本](#12我应该使用哪个版本)
     - [Jetty和JavaEE的Web规范](#13jetty和javaee的web规范)
     - [在Maven里面找到Jetty](#14在maven里面找到jetty)
-  - 2. [使用Jetty]
-    - [下载Jetty]
-    - [运行Jetty]
-    - [部署Web应用]
-  - 3. [关于Jetty Configuration的介绍]
-    - [如何配置Jetty]
-    - [可以在Jetty里面配置什么]
+  - 2. [使用Jetty](#2使用jetty)
+    - [下载Jetty](#21下载jetty)
+    - [运行Jetty](#22运行jetty)
+    - [部署Web应用](#23部署web应用)
+  - 3. [关于Jetty Configuration的介绍](#3关于jetty-configuration的介绍)
+    - [如何配置Jetty](#31如何配置jetty)
+    - [可以在Jetty里面配置什么](#32可以在jetty里面配置什么)
 
 - - -
 <span id="1关于jetty的介绍"></span>
@@ -27,7 +27,7 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
 > - 第四部分，这个部分注重的是Jetty的开发，是给更高级的Jetty用户准备的。里面很大一部分是告诉你如何在一个现有项目里面去使用嵌入式Jetty。它还包含了几个栗子，里面讲述了许多Jetty架构之外的东西。这个部分也会告诉你如何使用Maven中的Jetty插件，同时也会介绍如何debugJetty。
 > - 第五部分，这部分是一些参考内容，包括一些Jetty架构的指南、JettyXML的语法、Jetty的分布式指南和一些常见问题的排查。同样会告诉你怎么才可以参与到Jetty社区中，参与贡献。
 
-[回到顶部](#开始使用jetty)
+[回到顶部](#top)
 - - -
 <span id="12我应该使用哪个版本"></span>
 #### 1.2、我应该使用哪个版本
@@ -38,7 +38,7 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
 
 > *大致说一下，Jetty8之前的版本都已经被弃用（Deprecated）了，更不要说是远古时期甚至是神话时期了（官网就这么描述的，好中二），从9.2开始就是稳定版了。92是jdk7、93以上就是jdk8了。*
 
-[回到顶部](#开始使用jetty)
+[回到顶部](#top)
 - - -
 <span id="13jetty和javaee的web规范"></span>
 #### 1.3、Jetty和JavaEE的Web规范
@@ -47,5 +47,22 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
 >
 > *表格我也不搞了，大家可以在[这里](http://www.eclipse.org/jetty/documentation/9.4.6.v20170531/jetty-javaee.html)去参照。*
 
-[回到顶部](#开始使用jetty)
+[回到顶部](#top)
+- - -
+<span id="14在maven里面找到jetty"></span>
+#### 1.4、在Maven里面找到Jetty
+
+就是告诉你Jetty的maven坐标，但是官网在这里比较坑，文档中说，Jetty是从项目成立初始就把项目发布到maven上了，由于历史原因，它的坐标变动了很多次，但是文档给出的示例代码也太不负责任了：
+```
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-project</artifactId>
+  <version>${project.version}</version>
+</dependency>
+```
+如果是`jetty-project`这个A值你能找到东西就有鬼了。
+
+我在README中给出了依赖的模板。
+
+然后还给出了一个Changelogs的坐标，这个没啥卵用。
 - - -
