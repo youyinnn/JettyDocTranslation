@@ -1,10 +1,10 @@
-### Ⅰ. 开始使用Jetty
+### Ⅰ.开始使用Jetty
 <span id="开始使用jetty"></span>
-  - 1. [关于Jetty的介绍](#11关于jetty的介绍)
-    - [什么是Jetty](#111什么是jetty)
-    - [我应该使用哪个版本](#112我应该使用哪个版本)
-    - [Jetty和JavaEE的Web规范](#113jetty和javaee的web规范)
-    - [在Maven里面找到Jetty](#114在maven里面找到jetty)
+  - 1. [关于Jetty的介绍](#1关于jetty的介绍)
+    - [什么是Jetty](#11什么是jetty)
+    - [我应该使用哪个版本](#12我应该使用哪个版本)
+    - [Jetty和JavaEE的Web规范](#13jetty和javaee的web规范)
+    - [在Maven里面找到Jetty](#14在maven里面找到jetty)
   - 2. [使用Jetty]
     - [下载Jetty]
     - [运行Jetty]
@@ -14,9 +14,9 @@
     - [可以在Jetty里面配置什么]
 
 - - -
-<span id="11关于jetty的介绍"></span>
+<span id="1关于jetty的介绍"></span>
 ### 1、关于Jetty的介绍
-<span id="111什么是jetty"></span>
+<span id="11什么是jetty"></span>
 #### 1.1、什么是Jetty
 Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，和Servlet容器来使用。
 
@@ -29,7 +29,7 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
 
 [回到顶部](#开始使用jetty)
 - - -
-<span id="112我应该使用哪个版本"></span>
+<span id="12我应该使用哪个版本"></span>
 #### 1.2、我应该使用哪个版本
 
 > *这里使用表格介绍了Jetty版本对应的发布年、持有者、支持的JDK版本、支持的协议、servlet规范版本、JSP规范版本、以及是否是稳定还是已经被遗弃。*
@@ -40,7 +40,7 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
 
 [回到顶部](#开始使用jetty)
 - - -
-<span id="113jetty和javaee的web规范"></span>
+<span id="13jetty和javaee的web规范"></span>
 #### 1.3、Jetty和JavaEE的Web规范
 
 > *这里介绍的也是Jetty对JavaEE规范的支持程度，值得一提的是，Jetty并没有实现完整的规范，部分规范需要以Jetty插件的形式去支持。*
