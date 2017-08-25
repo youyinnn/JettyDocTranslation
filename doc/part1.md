@@ -291,7 +291,9 @@ INFO: Base directory was modified
 > *译者文外补充：第一行命令是在当前运行时环境变量中添加一条环境变量，把`JETTY_BASE`目录指定为`/tmp/mybase`，第二行创建这个目录，第三行是进入到这个目录，第四行是尝试运行这个目录，但是提示失败因为目录里啥也没有。然后使用`--create-startd`命令和`--add-to-start=http,deploy`命令去初始化和添加HTTP连接和Web部署模块，然后把之前demo-base目录中的一个war包复制过来，最后启动项目*
 
 <br>
+
 <span id="223更改jetty的端口号"></span>
+
 ##### 2.2.3、更改Jetty服务器运行的默认端口号
 
 ```
