@@ -22,9 +22,13 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
 
 这个指南总共分为以下5个部分：
 > - 第一部分，告诉你怎么开始使用Jetty。 它提供了Jetty的相关信息以及你可以在哪里下载到它，以及你可以在哪些仓库源中找到它，比如Maven的中央仓库。它还提供了一个Quick Start，告诉你如何启动和运行Jetty，以及一个关于如何配置Jetty和Jetty可以配置些什么的概述。
+
 > - 第二部分，更加详细的给予你配置Jetty的指南。它解释了Jetty如何去部署一个Web应用，如何配置上下文和连接，以及如何实现SSL和其他的安全措施。
+
 > - 第三部分，这是如何管理Jetty的重点指南。它从服务器的启动到session的管理，日志记录，HTTP/2的支持，再到Jetty的优化，这些章节会帮助管理者学到很多Jetty实例以外的知识。这个部分当然也会告诉你怎么配置和其他servlet容器一样都会有的许多配置，比如JNDI和JMX。
+
 > - 第四部分，这个部分注重的是Jetty的开发，是给更高级的Jetty用户准备的。里面很大一部分是告诉你如何在一个现有项目里面去使用嵌入式Jetty。它还包含了几个栗子，里面讲述了许多Jetty架构之外的东西。这个部分也会告诉你如何使用Maven中的Jetty插件，同时也会介绍如何debugJetty。
+
 > - 第五部分，这部分是一些参考内容，包括一些Jetty架构的指南、JettyXML的语法、Jetty的分布式指南和一些常见问题的排查。同样会告诉你怎么才可以参与到Jetty社区中，参与贡献。
 
 [回到顶部](#top)
@@ -52,7 +56,7 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
 <span id="14在maven里面找到jetty"></span>
 #### 1.4、在Maven里面找到Jetty
 
-就是告诉你Jetty的maven坐标，但是官网在这里比较坑，文档中说，Jetty是从项目成立初始就把项目发布到maven上了，由于历史原因，它的坐标变动了很多次，但是文档给出的示例代码也太不负责任了：
+> *就是告诉你Jetty的maven坐标，但是官网在这里比较坑，文档中说，Jetty是从项目成立初始就把项目发布到maven上了，由于历史原因，它的坐标变动了很多次，但是文档给出的示例代码也太不负责任了：*
 ```
 <dependency>
   <groupId>org.eclipse.jetty</groupId>
@@ -60,9 +64,90 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
   <version>${project.version}</version>
 </dependency>
 ```
-如果是`jetty-project`这个A值你能找到东西就有鬼了。
+> *如果是`jetty-project`这个A值你能找到东西就有鬼了。*
 
-我在README中给出了依赖的模板。
+> *我在README中给出了依赖的模板，大家去参照那个。*
 
-然后还给出了一个Changelogs的坐标，这个没啥卵用。
+> *然后还给出了一个Changelogs的坐标，这个没啥卵用。*
+
+[回到顶部](#top)
+- - -
+<span id="2使用jetty"></span>
+### 2、使用Jetty
+<span id="21下载jetty"></span>
+#### 2.1、下载Jetty
+
+##### 独立版本：
+
+独立的Jetty版本你可以在eclipse公司主页上下载：
+
+**Jetty** https://www.eclipse.org/jetty/download.html
+
+它包含了zip和gzip两种格式，去下载一个最适合你系统的版本吧。让你下载好并且解压好之后，你会得到一个`jetty-distribution-VERSION`的目录。
+
+把这个目录放在你常用的位置，文章后面的部分会引用到这个目录，我们使用`JETTY_HOME`或者`${jetty.home}`来在环境变量和Java程序中引用它。
+
+> **注意**
+>
+> 你必须要知道的一点是：只有稳定版（stable releases）才能使用在生产环境。如果是被舍弃版本（deprecated）或者是里程碑版本（Milestones）即M版，或者是候选版（Release Candidates）即RC版，并不适合在生产环境中使用，因为它们可能会造成安全隐患或者是功能不完善等问题。
+
+目录包含的内容：
+
+> license-eplv10-aslv20.html
+>
+> 这是Jetty的开源许可文件
+
+> README.txt
+>
+> 包含一些快速开始的指南
+
+> VERSION.txt
+>
+> 版本信息
+
+> bin/
+>
+> 帮助Jetty运行的shell程序
+
+> etc/
+>
+> Jetty的XML配置文件目录
+
+> lib/
+>
+> Jetty运行所必须jar包
+
+> logs/
+>
+> 请求日志目录
+
+> modules/
+>
+> 模块定义的目录
+
+> notice.html
+>
+> 开源许可介绍和注意事项
+
+> resources/
+>
+> 包含额外的资源、配置
+
+> start.ini
+>
+> 包含有效的命令行参数的启动文件（模块、配置、xml配置文件）
+
+> start.jar
+>
+> 运行Jetty的jar文件
+
+> webapps/
+>
+> 包含在Jetty默认配置下运行的web项目
+
+##### 家用版
+
+> *这个我也不知道怎么介绍，官网的意思是说，这个是较小的Jetty版本，适合对Jetty比较熟悉了的高级的Jetty用户使用，下载地址和目录说明我就不写了，大家有能力自己去了解。*
+
+[回到顶部](#top)
 - - -
