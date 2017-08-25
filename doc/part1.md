@@ -294,7 +294,7 @@ INFO: Base directory was modified
 
 <span id="223更改jetty的端口号"></span>
 
-##### 2.2.3、更改Jetty服务器运行的默认端口号
+##### 2.2.3、更改Jetty的端口号
 
 ```
 > cd $JETTY_BASE
