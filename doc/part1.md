@@ -12,10 +12,15 @@
       - [创建Jetty Base](#222创建jetty-base)
       - [更改Jetty的端口号](#223更改jetty的端口号)
       - [为HTTPS和HTTP2添加SSL](#224为https和http2添加ssl)
-      - [获取更多的start.jar选项](#225获取更多的startjar选项)
+      - [更改HTTPS的端口号](#225更改https的端口号)
+      - [获取更多的start.jar选项](#226获取更多的startjar选项)
     - [部署Web应用](#23部署web应用)
   - 3. [关于Jetty Configuration的介绍](#3关于jetty-configuration的介绍)
     - [如何配置Jetty](#31如何配置jetty)
+      - [使用POJO的方法配置](#311使用pojo的方法配置)
+      - [使用Start配置文件配置](#312使用start配置文件配置)
+      - [其他配置文件](#313其他配置文件)
+      - [IoC、XML的形式配置](#314iocxml的形式配置)
     - [可以在Jetty里面配置什么](#32可以在jetty里面配置什么)
 
 - - -
@@ -166,7 +171,8 @@ Jetty是一个开源的项目，它可以作为HTTP服务器，HTTP客户端，�
 - [2.2.2、创建Jetty Base](#222创建jetty-base)
 - [2.2.3、更改Jetty的端口号](#223更改jetty的端口号)
 - [2.2.4、为HTTPS和HTTP2添加SSL](#224为https和http2添加ssl)
-- [2.2.5、获取更多的start.jar选项](#225获取更多的startjar选项)
+- [2.2.5、更改HTTPS的端口号](#225更改https的端口号)
+- [2.2.6、获取更多的start.jar选项](#226获取更多的startjar选项)
 
 ##### 2.2.0、一个HelloWorld：
 
@@ -315,3 +321,176 @@ INFO: Base directory was modified
 > - `jetty.http.port`这个配置是被在`etc/jetty.http.xml`文件中的`PropertyXML`对象把端口设置注入到`ServerConnector`实例中去的。
 >
 > 你可以在后面的章节中学到配置的更详细的说明。
+
+
+<span id="224为https和http2添加ssl"></span>
+
+##### 2.2.4、为HTTPS和HTTP2添加SSL
+
+在上面的栗子中，我们可以为服务器激活附加的HTTPS模块和HTTP2模块。你可以使用以下命令添加：
+```
+> java -jar $JETTY_HOME/start.jar --add-to-start=https,http2
+
+ALERT: There are enabled module(s) with licenses.
+The following 1 module(s):
+ + contains software not provided by the Eclipse Foundation!
+ + contains software not covered by the Eclipse Public License!
+ + has not been audited for compliance with its license
+
+ Module: alpn-impl/alpn-8
+  + ALPN is a hosted at github under the GPL v2 with ClassPath Exception.
+  + ALPN replaces/modifies OpenJDK classes in the sun.security.ssl package.
+  + http://github.com/jetty-project/jetty-alpn
+  + http://openjdk.java.net/legal/gplv2+ce.html
+
+Proceed (y/N)? y
+INFO  : alpn-impl/alpn-1.8.0_92 dynamic dependency of alpn-impl/alpn-8
+INFO  : alpn            transitively enabled, ini template available with --add-to-start=alpn
+INFO  : alpn-impl/alpn-8 dynamic dependency of alpn
+INFO  : http2           initialized in ${jetty.base}/start.d/http2.ini
+INFO  : https           initialized in ${jetty.base}/start.d/https.ini
+INFO  : ssl             transitively enabled, ini template available with --add-to-start=ssl
+MKDIR : ${jetty.base}/lib/alpn
+DOWNLD: http://central.maven.org/maven2/org/mortbay/jetty/alpn/alpn-boot/8.1.8.v20160420/alpn-boot-8.1.8.v20160420.jar to ${jetty.base}/lib/alpn/alpn-boot-8.1.8.v20160420.jar
+MKDIR : ${jetty.base}/etc
+COPY  : ${jetty.home}/modules/ssl/keystore to ${jetty.base}/etc/keystore
+INFO  : Base directory was modified
+
+> java -jar $JETTY_HOME/start.jar
+[...]
+2017-05-22 12:48:23.271:INFO:oejs.AbstractConnector:main: Started ServerConnector@134d0064{SSL,[ssl, alpn, h2, http/1.1]}{0.0.0.0:8443}
+[...]
+```
+`--add-to-start`为ini文件添加了一行有效的命令行命令，它可以运行一个支持HTTPS和HTTP2的SSL连接，下面是过程参照：
+
+- 过渡性地激活SSL模块，这会在`etc/jetty-ssl.xml`和`etc/jetty-ssl-context.xml`文件中添加有效的命令行，这样就给服务器配置好了SSL连接。
+
+- 过渡性地激活APLN模块，这会在`etc/jetty-alpn.xml`文件中添加有效的命令行，这样就为SSL连接配置好了应用层协议。
+
+- 在`etc/jetty-https.xml`文件中添加有效的命令行，这会创建`start.d/https.ini`，这样就为SSL连接配置上了HTTPS协议。
+
+- 在`etc/jetty-http2.xml`文件中添加有效的命令行，这会创建`start.d/http2.ini`，这样就为SSL连接配置上了HTTP/2协议。
+
+- 检查是否存在`etc/keystore`文件，如果不存在，就联网下载一个示范用的keystore文件。
+
+
+<span id="225更改https的端口号"></span>
+
+##### 2.2.5、更改HTTPS的端口号
+
+你可以通过命令：
+```
+> cd $JETTY_BASE
+> java -jar $JETTY_HOME/start.jar jetty.ssl.port=8444
+```
+除此之外，你还可以在`start.ini`或者`start.d/*.ini`中设置有效的命令行去修改ssl端口号，你可以在“[Start.ini vs Start.d]()”中了解到更多。
+
+<span id="226获取更多的startjar选项"></span>
+
+##### 2.2.6、获取更多的start.jar选项
+
+`start.jar`的工作有：
+
+- 解释start.ini和start.d目录下的配置文件的命令行来建立Java类路径环境。
+
+- 罗列出所有配置和配置文件并通过JettyXML配置机制的主类去加载到环境中。
+
+> *原文这两段话如下：* The job of the start.jar is to interpret the command line, start.ini and start.d directory (and associated .ini files) to build a Java classpath and list of properties and configuration files to pass to the main class of the Jetty XML configuration mechanism.
+
+你可以通过以下命令行去获取更多的选项：
+```
+> java -jar $JETTY_HOME/start.jar --help
+```
+
+[回到顶部](#top)
+- - -
+<span id="23部署web应用"></span>
+#### 2.3、部署Web应用
+
+一个配置了deploy模块的Jetty服务器实例（即一个JettyBase）会有一个web应用部署器在webapps目录，它支持对web应用的热部署。按照下面的协定方式把标准的WAR文件和Jetty配置文件放置在webapps目录下你就可以在服务器上实现热部署了。
+
+- 一个名为`example/`的目录作为将要被部署的Web应用，它需要包含`WEB-INF`子目录，不然这个应用就会被当作静态内容。一般的情况下路由路径会是`http://localhost:8080/example/`，除非你的目录名为`ROOT`，这样你的路径就会是`http://localhost:8080/`。如果目录名以.d结尾，那么它将被忽略（它可以作为额外的配置文件的放置目录使用）
+
+- 一个名为`example.war`的文件会作为标准web应用被部署，路径如上，如果名为`ROOT.war`路径也如上。如果`example.war`和`example/`同时存在，则会部署war文件（就会部署war中未解压的wab项目）。
+
+- 一个example.xml文件，会被配置为上下文环境（context）。文件中必须设置上下文环境的路径（context path）。如果xml文件和war文件同时存在，则会部署xml文件对应的web项目（就会部署里面配置的war文件）。
+
+在demo-base/wabapps中示例了多种目录以及多种部署方式。
+
+[回到顶部](#top)
+- - -
+
+<span id="3关于jetty-configuration的介绍"></span>
+### 3、关于Jetty Configuration的介绍
+
+#### 3.1、如何配置Jetty
+  - [3.1.1、使用POJO的方法配置](#311使用pojo的方法配置)
+  - [3.1.2、使用Start配置文件配置](#312使用start配置文件配置)
+  - [3.1.3、其他配置文件](#313其他配置文件)
+  - [3.1.4、IoC、XML的形式配置](#314iocxml的形式配置)
+
+<span id="311使用pojo的方法配置"></span>
+##### 3.1.1、使用POJO的方法配置
+
+Jetty的核心组件就是POJO，配置的过程就是实例化的POJO、给POJO装配属性的过程。你可以通过以下的方法实现：
+
+- 在嵌入式开发中，把Jetty对象写在Java代码里。
+
+- 使用JettyXML配置机制，这是一种实现了IoC机制的框架，会把配置好的XML对象作为Jetty对象装配好。`etc/jetty.xml`文件是主要的JettyXML配置文件，但是在Jetty目录中也有许多其他的类似`etc/jetty-__feature__.xml`文件。
+
+- 使用第三方的IoC框架，比如Spring，来实例化Jetty成JavaBean。
+
+ 因为Jetty的主要配置是通过IoC来完成的，所以你可以在“[Jetty API 文档]()”中参考最终的完整的配置。
+
+<br>
+
+##### 3.1.2、使用Start配置文件配置
+
+Jetty使用以下的配置文件去实例化，通过start.jar机制去注入和启动服务器。
+
+* **ini文件：**
+Jetty的启动机制是使用命令行来完成的，`$JETTY_BASE/start.ini`或者是`$JETTY_BASE/start.d/*.ini`文件写好了有效的命令行参数来启动Jetty，这些参数可能是：
+  * > 模块的激活：`--modules=name`
+  * > 配置参数：`name=value`可以在JettyIoC中使用
+  * > 在JettyXML中或者Spring中的XML文件
+  * > 标准的Java配置文件
+  * > 其他`start.jar`的配置选项（详见 java -jar start.jar --help）
+  * > 一些JVM的选项
+> **NOTE：**
+>
+> 只有在JettyBase目录（如果JettyBase目录不是JettyHome目录）下的ini文件，才能特别的更改配置。
+>
+> *文档原文：It is the ini files located in the Jetty base directory (if different from Jetty home) that are typically edited to change the configuration (e.g. change ports).*
+
+<br>
+
+* **mod文件：**
+`$JETTY_HOME/modules/*.mod`文件定义了可使用的模块，你可以用`--modules=name`配置去激活它们。每一个mod都定义了：
+  * > 模块依赖的命令和激活指令
+  * > 模块需要添加到类路径中的库文件
+  * > 模块需要加载到有效启动命令行的XML文件
+  * > 模块启动所需要的必要文件
+  * > 模板ini文件的内容，你可以使用`--add-to-start=name`命令选项添加ini文件到你的JettyBase/start.d/目录中
+
+    我们提供的module文件尽量不要编辑，除非是在一些重要的构建变更的时候。mod文件通常被默认放置在`$JETTY_HOME/modules/`目录下，但是你可以在`$JETTY_BASE/modules/`中添加额外的mod配置文件。如果需要改变模块，你最好从`$JETTY_HOME/modules/`目录中复制特定的mod文件到`$JETTY_BASE/modules/`中去，然后再对其进行修改。
+
+<br>
+
+* **XML文件：**
+在[Jetty IoC XML形式]()或者Spring IoC形式中的XML文件。
+后面的我就不翻译了，有需要的自己看，就一段话，并没有说明如何配置。
+> *文档原文：*
+> XML files in Jetty IoC XML format or Spring IoC format are listed either on the command line, in ini files, or are added to the effective command line by a module definition.
+>
+> The XML files instantiate and inject the actual Java objects that comprise the server, connectors and contexts. Because Jetty IoC XML files use properties, most common configuration tasks can be accomplished without editing these XML files and can instead be achieved by editing the property in the corresponding ini files.
+>
+> XML files are normally located in `$JETTY_HOME/etc/`, but extra or edited XML files may be added to `$JETTY_BASE/etc/`. Note If XML configuration changes are required, it is best practice to copy the XML file from `$JETTY_HOME/etc/` to `$JETTY_BASE/etc/` before being modified.
+
+下图描述了Jetty的各种各样的配置文件是如何联系起来的：
+
+![Jetty_Configuration_File_Relationships](https://github.com/youyinnn/JettyDocTranslation/raw/master/img/Jetty_Configuration_File_Relationships.png)
+
+[回到顶部](#top)
+- - -
+<span id="32可以在jetty里面配置什么"></span>
+### 3.2、可以在Jetty里面配置什么
