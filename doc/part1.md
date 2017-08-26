@@ -511,24 +511,6 @@ Jetty的启动机制是使用命令行来完成的，`$JETTY_BASE/start.ini`或�
 ##### 3.1.4、Jetty的IoC XML的形式配置
 你可以在Java代码里面启动服务器：
 ```
-//
-//  ========================================================================
-//  Copyright (c) 1995-2017 Mort Bay Consulting Pty. Ltd.
-//  ------------------------------------------------------------------------
-//  All rights reserved. This program and the accompanying materials
-//  are made available under the terms of the Eclipse Public License v1.0
-//  and Apache License v2.0 which accompanies this distribution.
-//
-//      The Eclipse Public License is available at
-//      http://www.eclipse.org/legal/epl-v10.html
-//
-//      The Apache License v2.0 is available at
-//      http://www.opensource.org/licenses/apache2.0.php
-//
-//  You may elect to redistribute this code under either of these licenses.
-//  ========================================================================
-//
-
 package org.eclipse.jetty.embedded;
 
 import org.eclipse.jetty.server.Connector;
@@ -672,24 +654,6 @@ Jetty服务器连接器是一个网络端点接受连接一个或多个协议产
 
 你可以通过API去配置Context：
 ```
-//
-//  ========================================================================
-//  Copyright (c) 1995-2017 Mort Bay Consulting Pty. Ltd.
-//  ------------------------------------------------------------------------
-//  All rights reserved. This program and the accompanying materials
-//  are made available under the terms of the Eclipse Public License v1.0
-//  and Apache License v2.0 which accompanies this distribution.
-//
-//      The Eclipse Public License is available at
-//      http://www.eclipse.org/legal/epl-v10.html
-//
-//      The Apache License v2.0 is available at
-//      http://www.opensource.org/licenses/apache2.0.php
-//
-//  You may elect to redistribute this code under either of these licenses.
-//  ========================================================================
-//
-
 package org.eclipse.jetty.embedded;
 
 import org.eclipse.jetty.server.Server;
