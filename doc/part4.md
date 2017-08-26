@@ -309,7 +309,9 @@ public class OneHandler
   持有一个含有其他Handler的collection，处理请求的时候会调用collection顺序中的每一个handler。你可用使用它把一些作统计用的handlers和一些作日志用的handlers练成一串，统一生成响应。
 
 - HandlerList
-  持有一个含有其他Handler的collection，和HandlerCollection不同的是，它的处理机制是轮流的，处理请求的时候会调用上次该轮到的那个handler。直到返回异常或者响应已经被确认或者`request.isHandled()`方法返回true的时候才会停止。你可用使用这种连接方式去连接按照条件处理的handler，比如匹配不同的虚拟主机。
+  持有一个含有其他Handler的collection，和HandlerCollection不同的是，如果某个handler返回异常或者响应已经被确认或者`request.isHandled()`方法返回true的时候才会停止。你可用使用这种连接方式去连接按照条件处理的handler，比如匹配不同的虚拟主机。
+
+> *译者文外补充：异常就是handler内报错；响应被确认应该是整条链跑到底了；而isHandled()则是某个在handler里面调用`baseRequest.setHandled(true)`方法。*
 
 - HandlerWrapper
   一个Handler的基类，你可用它来把很多handler以良好的链式处理连在一起形成一个AOP切面。比如说一个标准的Web程序是由一个context handlers、一个session handlers、一个security handlers和一个servlet handlers组成。
@@ -393,10 +395,11 @@ public class FileServer
 你会注意到有一个HandlerList对象，里面链接了ResourceHandler和DefaultHandler，这样DefaultHandler会在访问到不存在资源的情况下生成404响应。
 
 
-
 <br>
 <span id="2124嵌入connectors"></span>
 ##### 21.2.4、嵌入Connectors
+- 21.2.4.1、一个Connectors
+- 21.2.4.2、多个Connectors
 <br>
 <span id="2125嵌入contexts"></span>
 ##### 21.2.5、嵌入Contexts
