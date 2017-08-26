@@ -488,7 +488,7 @@ Jetty的启动机制是使用命令行来完成的，`$JETTY_BASE/start.ini`或�
 
 下图描述了Jetty的各种各样的配置文件是如何联系起来的：
 
-![Jetty_Configuration_File_Relationships](https://github.com/youyinnn/JettyDocTranslation/raw/master/img/Jetty_Configuration_File_Relationships.png)
+![Jetty_Configuration_File_Relationships](https://github.com/youyinnn/JettyDocTranslation/raw/master/doc/img/Jetty_Configuration_File_Relationships.png)
 
 [回到顶部](#top)
 - - -
