@@ -20,8 +20,11 @@
       - [使用POJO的方法配置](#311使用pojo的方法配置)
       - [使用Start配置文件配置](#312使用start配置文件配置)
       - [其他配置文件](#313其他配置文件)
-      - [IoC、XML的形式配置](#314iocxml的形式配置)
+      - [Jetty的IoC XML的形式配置](#314jetty的ioc-xml的形式配置)
     - [可以在Jetty里面配置什么](#32可以在jetty里面配置什么)
+      - [配置Server](#321配置server)
+      - [配置Connectors](#322配置connectors)
+      - [配置Contexts](#323配置contexts)
 
 - - -
 <span id="1关于jetty的介绍"></span>
@@ -294,6 +297,8 @@ INFO: Base directory was modified
 2015-06-04 11:10:16.646:INFO:oejs.Server:main: Started @634ms
 ```
 
+<br>
+
 > *译者文外补充：第一行命令是在当前运行时环境变量中添加一条环境变量，把`JETTY_BASE`目录指定为`/tmp/mybase`，第二行创建这个目录，第三行是进入到这个目录，第四行是尝试运行这个目录，但是提示失败因为目录里啥也没有。然后使用`--create-startd`命令和`--add-to-start=http,deploy`命令去初始化和添加HTTP连接和Web部署模块，然后把之前demo-base目录中的一个war包复制过来，最后启动项目*
 
 <br>
@@ -308,7 +313,7 @@ INFO: Base directory was modified
 ...
 ```
 当项目运行的时候，就会在8081端口中运行，你需要注意的是，使用命令行配置只对当次的JettyBase中的web项目有效，如果你想永久地改变当前JettyBase的web项目运行的端口号，你可以修改start.d目录中http.ini文件的配置。
-> *译者文外补充：前提是你为这个JettyBase添加了HTTP连接*
+> *译者文外补充：前提是你为这个JettyBase添加了HTTP连接模块*
 
 > **NOTE：**
 >
@@ -427,9 +432,9 @@ INFO  : Base directory was modified
   - [3.1.1、使用POJO的方法配置](#311使用pojo的方法配置)
   - [3.1.2、使用Start配置文件配置](#312使用start配置文件配置)
   - [3.1.3、其他配置文件](#313其他配置文件)
-  - [3.1.4、IoC、XML的形式配置](#314iocxml的形式配置)
+  - [3.1.4、Jetty的IoC XML的形式配置](#314jetty的ioc-xml的形式配置)
 
-<span id="311使用pojo的方法配置"></span>
+  <span id="311使用pojo的方法配置"></span>
 ##### 3.1.1、使用POJO的方法配置
 
 Jetty的核心组件就是POJO，配置的过程就是实例化的POJO、给POJO装配属性的过程。你可以通过以下的方法实现：
@@ -444,6 +449,7 @@ Jetty的核心组件就是POJO，配置的过程就是实例化的POJO、给POJO
 
 <br>
 
+<span id="312使用start配置文件配置"></span>
 ##### 3.1.2、使用Start配置文件配置
 
 Jetty使用以下的配置文件去实例化，通过start.jar机制去注入和启动服务器。
@@ -490,7 +496,140 @@ Jetty的启动机制是使用命令行来完成的，`$JETTY_BASE/start.ini`或�
 
 ![Jetty_Configuration_File_Relationships](https://github.com/youyinnn/JettyDocTranslation/raw/master/doc/img/Jetty_Configuration_File_Relationships.png)
 
+
+<span id="313其他配置文件"></span>
+
+##### 3.1.3、其他的配置文件
+* **Context XML文件**
+* **web.xml文件**
+* **properties文件**
+
+关于这三种配置文件的介绍内容就不再翻译，有需要的同学可以去[原文](http://www.eclipse.org/jetty/documentation/9.4.6.v20170531/quick-start-configure.html#quickstart-config-how)学习。
+
+<span id="314jetty的ioc-xml的形式配置"></span>
+
+##### 3.1.4、Jetty的IoC XML的形式配置
+你可以在Java代码里面启动服务器：
+```
+//
+//  ========================================================================
+//  Copyright (c) 1995-2017 Mort Bay Consulting Pty. Ltd.
+//  ------------------------------------------------------------------------
+//  All rights reserved. This program and the accompanying materials
+//  are made available under the terms of the Eclipse Public License v1.0
+//  and Apache License v2.0 which accompanies this distribution.
+//
+//      The Eclipse Public License is available at
+//      http://www.eclipse.org/legal/epl-v10.html
+//
+//      The Apache License v2.0 is available at
+//      http://www.opensource.org/licenses/apache2.0.php
+//
+//  You may elect to redistribute this code under either of these licenses.
+//  ========================================================================
+//
+
+package org.eclipse.jetty.embedded;
+
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+
+public class ExampleServer
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server();
+
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(8080);
+        server.setConnectors(new Connector[] { connector });
+
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/");
+        context.addServlet(HelloServlet.class, "/hello");
+        context.addServlet(AsyncEchoServlet.class, "/echo/*");
+
+        HandlerCollection handlers = new HandlerCollection();
+        handlers.setHandlers(new Handler[] { context, new DefaultHandler() });
+        server.setHandler(handlers);
+
+        server.start();
+        server.join();
+    }
+}
+```
+你也可以使用Jetty IoC XML的形式去配置一个一模一样的服务器，完全不用写任何代码：
+```
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+
+<Configure id="ExampleServer" class="org.eclipse.jetty.server.Server">
+
+  <Set name="connectors">
+    <Array type="org.eclipse.jetty.server.Connector">
+      <Item>
+        <New class="org.eclipse.jetty.server.ServerConnector">
+          <Arg><Ref refid="ExampleServer"/></Arg>
+          <Set name="port">8080</Set>
+        </New>
+      </Item>
+    </Array>
+  </Set>
+
+  <New id="context" class="org.eclipse.jetty.servlet.ServletContextHandler">
+    <Set name="contextPath">/hello</Set>
+    <Call name="addServlet">
+      <Arg>org.eclipse.jetty.embedded.HelloServlet</Arg>
+      <Arg>/</Arg>
+    </Call>
+  </New>
+
+  <Set name="handler">
+    <New class="org.eclipse.jetty.server.handler.HandlerCollection">
+      <Set name="handlers">
+        <Array type="org.eclipse.jetty.server.Handler">
+          <Item>
+            <Ref refid="context" />
+          </Item>
+          <Item>
+            <New class="org.eclipse.jetty.server.handler.DefaultHandler" />
+          </Item>
+        </Array>
+      </Set>
+    </New>
+  </Set>
+</Configure>
+```
+
+<br>
+
+> *译者文外补充：JettyIOC的注入方式的使用非常蠢，不建议使用。*
+
 [回到顶部](#top)
 - - -
 <span id="32可以在jetty里面配置什么"></span>
-### 3.2、可以在Jetty里面配置什么
+#### 3.2、可以在Jetty里面配置什么
+- [配置Server](#321配置server)
+- [配置Connectors](#322配置connectors)
+- [配置Contexts](#323配置contexts)
+
+这一部分会给出一些之前的章节没有介绍过的配置机制的概述。
+
+<span id="321配置server"></span>
+##### 3.2.1、配置Server
+
+
+<span id="322配置connectors"></span>
+##### 3.2.2、配置Connectors
+
+
+<span id="323配置contexts"></span>
+##### 3.2.3、配置Contexts
+
+[回到顶部](#top)
+- - -
