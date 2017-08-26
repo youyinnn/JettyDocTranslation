@@ -618,18 +618,114 @@ public class ExampleServer
 - [配置Connectors](#322配置connectors)
 - [配置Contexts](#323配置contexts)
 
-这一部分会给出一些之前的章节没有介绍过的配置机制的概述。
+这一部分会给出一些之前的章节没有介绍过的配置机制的概述。在整个文档的最后一部分中的“[Jetty Architecture]()”章节会为你解释Jetty服务器的整体架构，这对于你了解Jetty的运行机制会非常有帮助，如果你还想修改Jetty默认的架构的话，你可以得到一些非常重要的指导。当然，Jetty的默认架构已经满足绝大部分的需求了。
 
 <span id="321配置server"></span>
 ##### 3.2.1、配置Server
 
+Server实例是Jetty服务器的中央协调对象（central coordination object），它提供了所有Jetty服务器组件所需要的服务以及生命周期的管理。在标准的Jetty发行版里面，核心的server服务的配置是在`etc/jetty.xml`文件中，但是你可以混合其他的服务器配置，可配置内容如下：
+
+> ThreadPool
+>
+> Handlers
+>
+> Server Attributes
+>
+> Server fields
+>
+> Connectors
+>
+> Services
+
+<br>
 
 <span id="322配置connectors"></span>
 ##### 3.2.2、配置Connectors
 
+Jetty服务器连接器是一个网络端点接受连接一个或多个协议产生Jetty服务器的请求或消息。在标准Jetty服务器中，可以通过额外的文件增加Jetty服务器支持的协议，例如http.ini，https.ini 和jetty-http2.xml，连接的配置一般都是典型的，如下：
 
+>Port
+>
+>Host
+>
+>Idle Timeout
+>
+>HTTP Configuration
+>
+>SSL Context Factory
+
+
+<br>
 <span id="323配置contexts"></span>
 ##### 3.2.3、配置Contexts
+
+常见的Context配置：
+>contextPath
+>
+>virtualHost
+>
+>classPath
+>
+>attributes
+>
+>resourceBase
+
+你可以通过API去配置Context：
+```
+//
+//  ========================================================================
+//  Copyright (c) 1995-2017 Mort Bay Consulting Pty. Ltd.
+//  ------------------------------------------------------------------------
+//  All rights reserved. This program and the accompanying materials
+//  are made available under the terms of the Eclipse Public License v1.0
+//  and Apache License v2.0 which accompanies this distribution.
+//
+//      The Eclipse Public License is available at
+//      http://www.eclipse.org/legal/epl-v10.html
+//
+//      The Apache License v2.0 is available at
+//      http://www.opensource.org/licenses/apache2.0.php
+//
+//  You may elect to redistribute this code under either of these licenses.
+//  ========================================================================
+//
+
+package org.eclipse.jetty.embedded;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+
+public class OneContext
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server( 8080 );
+
+        // Add a single handler on context "/hello"
+        ContextHandler context = new ContextHandler();
+        context.setContextPath( "/hello" );
+        context.setHandler( new HelloHandler() );
+
+        // Can be accessed using http://localhost:8080/hello
+
+        server.setHandler( context );
+
+        // Start the server
+        server.start();
+        server.join();
+    }
+}
+```
+<br>
+
+> *译者文外补充：*
+>
+> 后面还有使用JettyIoC去配置的示例代码我也不贴了。
+>
+> 这三种配置我并没有翻译在哪里配置以及每个配置项的具体含义，有需要的可以自己查看原文去配置，原文是有的。
+>
+> 后面还有一些关于web的配置介绍、ContextPath的配置介绍、Web应用的部署规则、认证Realm的设置等等，我感觉都不是什么有用的干活，也就不再翻译下去了。
+
 
 [回到顶部](#top)
 - - -
