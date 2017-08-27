@@ -657,6 +657,61 @@ public class OneServletContext
 <br>
 <span id="2128嵌入web应用程序"></span>
 ##### 21.2.8、嵌入Web应用程序
+
+一个`WebAppContext`是一个`ServletContextHandler`的拓展，它使用标准布局和`web.xml`来配置使用注解或者在web.xml中配置的Servlet、filters和其他功能。下面这个栗子配置了一个Jetty的测试webapp。Web应用可以使用容器提供的资源，在这个栗子里面的`LoginService`正是这样配置的：
+```
+package org.eclipse.jetty.embedded;
+
+import java.io.File;
+import java.lang.management.ManagementFactory;
+
+import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
+import org.eclipse.jetty.webapp.WebAppContext;
+
+public class OneWebApp
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server(8080);
+
+        // 设置JMX
+        MBeanContainer mbContainer = new MBeanContainer(
+                ManagementFactory.getPlatformMBeanServer());
+        server.addBean(mbContainer);
+
+        // WebAppContext对象是用来控制它自己赖以生存的环境的。
+        // 在这个栗子里面，context path设置为“/”
+        // 这样它就可以处理根context下的请求了
+        // 我们还可以看到它设置了war的位置
+        // 整个host的其他配置都是可用的可配置的
+        // 你可用配置注解扫描的支持（需要通过PlusConfiguration）
+        // 还可用选择webapp在哪里自动解压
+        WebAppContext webapp = new WebAppContext();
+        webapp.setContextPath("/");
+        File warFile = new File(
+                "../../tests/test-jmx/jmx-webapp/target/jmx-webapp");
+        webapp.setWar(warFile.getAbsolutePath());
+
+        // 一个WebAppContext是一个ContextHandler
+        // 所以它也需要被配置到server里面这样server才会知道请求将被送往哪里
+        server.setHandler(webapp);
+
+        // Start things up!
+        server.start();
+
+        server.dumpStdErr();
+
+        server.join();
+    }
+}
+```
+
+<br>
+
+> *译者文外补充：栗子中的JMX是一种额外组件，不是Jetty的服务。你可以准备一些war包自己测试。也可以不使用war包，直接使用有标准web应用布局的目录。*
+
 <br>
 <span id="2129像jettyxml一样进行嵌入式开发"></span>
 ##### 21.2.9、像JettyXML一样进行嵌入式开发
