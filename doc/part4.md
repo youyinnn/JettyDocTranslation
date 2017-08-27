@@ -11,11 +11,19 @@
       - [概述](#2121概述)
       - [创建Server](#2122创建server)
       - [使用Handler](#2123使用handler)
+        - [一个Handler的Hello World](#21231一个handler的hello-world)
+        - [运行HelloWorldHandler](#21232运行helloworldhandler)
+        - [Handler Collections和Wrappers](#21233handler-collections和wrappers)
+        - [Scoped Handlers](#21234scoped-handlers)
+        - [Resource Handler](#21235resource-handler)
       - [嵌入Connectors](#2124嵌入connectors)
-      - [嵌入Contexts](#2125嵌入contexts)
-      - [嵌入ServletContexts](#2126嵌入servletcontexts)
-      - [嵌入Web应用程序](#2127嵌入web应用程序)
-      - [像JettyXML一样进行嵌入式开发](#2128像jettyxml一样进行嵌入式开发)
+        - [一个Connectors](#21241一个connectors)
+        - [多个Connectors](#21242多个connectors)
+      - [嵌入Servlets](#2125嵌入servlets)
+      - [嵌入Contexts](#2126嵌入contexts)
+      - [嵌入ServletContexts](#2127嵌入servletcontexts)
+      - [嵌入Web应用程序](#2128嵌入web应用程序)
+      - [像JettyXML一样进行嵌入式开发](#2129像jettyxml一样进行嵌入式开发)
     - [嵌入开发的栗子](#)
   - 22. HTTP客户端（略）
   - 23. [Jetty和Maven](#)
@@ -144,10 +152,11 @@ public class HelloWorld extends AbstractHandler
   - 21.2.2、[创建Server](#2122创建server)
   - 21.2.3、[使用Handler](#2123使用handler)
   - 21.2.4、[嵌入Connectors](#2124嵌入connectors)
-  - 21.2.5、[嵌入Contexts](#2125嵌入contexts)
-  - 21.2.6、[嵌入ServletContexts](#2126嵌入servletcontexts)
-  - 21.2.7、[嵌入Web应用程序](#2127嵌入web应用程序)
-  - 21.2.8、[像JettyXML一样进行嵌入式开发](#2128像jettyxml一样进行嵌入式开发)
+  - 21.2.5、[嵌入Servlets](#2125嵌入servlets)
+  - 21.2.6、[嵌入Contexts](#2126嵌入contexts)
+  - 21.2.7、[嵌入ServletContexts](#2127嵌入servletcontexts)
+  - 21.2.8、[嵌入Web应用程序](#2128嵌入web应用程序)
+  - 21.2.9、[像JettyXML一样进行嵌入式开发](#2129像jettyxml一样进行嵌入式开发)
 
 Jetty有一句口号“不要把你的应用部署到Jetty，要把Jetty部署到你的应用中！”，Jetty被设计成是可以被实例化并且拿来使用的一个组件，就像一个Java的POJO对象一样。把Jetty服务嵌入到你的应用中，这意味着嵌入一个HTTP模块进你的应用中去。
 
@@ -305,6 +314,8 @@ public class OneHandler
 
 一个完整的请求处理是从多个Handlers中建立的，你可用以多种方式将多个Handler连接起来，Jetty提供了几种实现了`HandlerContainer`的实例：
 
+> *译者文外补充：HandlerContainer是Handler的容器，你可以把一套业务的Handler放在一个容器里面，再把这个容器添加到Server中，Handler容器的本质也是一个Handler。*
+
 - HandlerCollection
   持有一个含有其他Handler的collection，处理请求的时候会调用collection顺序中的每一个handler。你可用使用它把一些作统计用的handlers和一些作日志用的handlers练成一串，统一生成响应。
 
@@ -316,8 +327,12 @@ public class OneHandler
 - HandlerWrapper
   一个Handler的基类，你可用它来把很多handler以良好的链式处理连在一起形成一个AOP切面。比如说一个标准的Web程序是由一个context handlers、一个session handlers、一个security handlers和一个servlet handlers组成。
 
+> *译者文外补充：在其Javadoc中定义所描述：`HandlerWrapper`虽然拥有Handler一样的行为，但是它更加代表着Handler方法和`LifeCycle`接口，它不像`HandlerCollection`那样专注实现为一个Handler容器，这个基类常常被用来实现为具有装饰模式的容器。*
+
 - ConetextHandlerCollection
   一个专门的HandlerCollection，它用请求URL的最长的前缀来选择包含这个前缀的ContextHandler去处理请求。
+
+> *译者文外补充：它是继承于`HandlerCollection`的，在其Javadoc中定义所描述：这个`HandlerCollection`的子类可以对contexts和这个容器里面包含的handlers基于context path和`ContextHandlers`类的关系生成一一对应的映射。contexts并不需要直接装进这个容器中，你只需要把handlers装进去就可以了。多个contexts可能会有一样的context path，它们会按照顺序被调用直到其中一个handler处理了这次请求。*
 
 <br>
 
@@ -326,7 +341,7 @@ public class OneHandler
 
 许多标准Servlet容器，Jetty是用`HandlerWrapper`实现的，它把很多handler以良好的链式处理连在一起：`ContextHandler`-`SessionHandler`-`SecurityHandler`-`ServletHandler`。然而，因为Servlet规范的特性，这种链式处理并不能就这么单纯的就把handler嵌套起来，因为外层handler有时候会需要内层handler处理过的信息。比如说当ContextHandler调用应用的监听器以通知有请求进到context的时候，ServletHandler必须提前知道请求该转发到哪一个servlet，这样才好返回正确的servletPath值。
 
-`HandlerWrapper`是`ScopedHandler`抽象类的专门实现，这个抽象类提供了一个良好的链式范围。比如说一个ServletHandler嵌套在ContextHandler中，执行嵌套的顺序如下：
+`HandlerWrapper`是`ScopedHandler`抽象类的父类，这个抽象类提供了一个良好的链式范围。比如说一个ServletHandler嵌套在ContextHandler中，执行嵌套的顺序如下：
 ```
 Server.handle(...)
   ContextHandler.doScope(...)
@@ -336,6 +351,8 @@ Server.handle(...)
           SomeServlet.service(...)
 ```
 这样一来，当ContextHandler处理到请求后，在指定的ServletHandler里面也会处理一遍。
+
+> *译者文外补充：`ServletHandler`和`ContextHandler`都是`ScopedHandler`的具体实现。*
 
 <br>
 
@@ -398,20 +415,135 @@ public class FileServer
 <br>
 <span id="2124嵌入connectors"></span>
 ##### 21.2.4、嵌入Connectors
-- 21.2.4.1、一个Connectors
-- 21.2.4.2、多个Connectors
+- 21.2.4.1、[一个Connectors](#21241一个connectors)
+- 21.2.4.2、[多个Connectors](#21242多个connectors)
+
+在上一个栗子中，`Server`通过端口号在内部创建了一个默认的Connector来监听所有通过这个端口号进来的请求。然而，一般我们用Jetty作嵌入式开发的时候，正确的做法是显示地去配置一个或多个connector提供给`Server`实例。
+
+<span id="21241一个connectors"></span>
+###### 21.2.4.1、一个Connectors
+
+举个例子，`OneConnector.java`，实例化、配置、添加好了一个简单的HTTP Connector实例，并把这个实例添加到server中：
+```
+package org.eclipse.jetty.embedded;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+
+/**
+ * A Jetty server with one connectors.
+ */
+public class OneConnector
+{
+    public static void main( String[] args ) throws Exception
+    {
+        // The Server
+        Server server = new Server();
+
+        // HTTP connector
+        ServerConnector http = new ServerConnector(server);
+        http.setHost("localhost");
+        http.setPort(8080);
+        http.setIdleTimeout(30000);
+
+        // Set the connector
+        server.addConnector(http);
+
+        // Set a handler
+        server.setHandler(new HelloHandler());
+
+        // Start the server
+        server.start();
+        server.join();
+    }
+}
+```
+上栗的connector可以处理HTTP协议的请求，这样的实现方式是`ServerConnector`类的默认方式是一样的。
 <br>
-<span id="2125嵌入contexts"></span>
-##### 21.2.5、嵌入Contexts
+
+<span id="21242多个connectors"></span>
+###### 21.2.4.2、多个Connectors
+
+如果想要配置多个connectors的时候（比如HTTP+HTTPS），可能需要共享一些为HTTP连接配置过的参数。为了做到这一点，你需要显示地使用`ConnectionFactory`实例去配置`ServerConnector`类，然后提供它们通用的HTTP配置。
+
+> *译者文外补充：这里文档并没有给出示例代码，代码的下载链接也挂了，后面仅有一段关于这个多连接栗子的描述，我就不翻译了。关于这多链接的示例代码，“已往之不谏”前辈的博客里面有，大家可以在[这里](http://www.cnblogs.com/yiwangzhibujian/p/5845623.html)去参考。*
+
+> *栗子描述原文：The ManyConnectors example, configures a server with two `ServerConnector` instances: the http connector has a `HTTPConnectionFactory` instance; the https connector has a `SslConnectionFactory` chained to a `HttpConnectionFactory`. Both `HttpConnectionFactory` are configured based on the same `HttpConfiguration` instance, however the HTTPS factory uses a wrapped configuration so that a `SecureRequestCustomizer` can be added.*
+
 <br>
-<span id="2126嵌入servletcontexts"></span>
-##### 21.2.6、嵌入ServletContexts
+<span id="2125嵌入servlets"></span>
+##### 21.2.5、嵌入Servlets
+
+Servlet是为HTTP请求提供业务逻辑的标准解决方案。Servlet除了它里面的request对象是不可变的之外，在其他方面和Jetty的Handler很像。在Jetty里面Servlet通过`ServletHandler`类去接入处理。这个类使用标准的路径映射去为请求匹配一个Servlet，你还需要设置请求的`servletPath`和`pathInfo`，然后通过一些Filters处理之后，把请求传递到servlet，以生成项响应。
+
+以下的栗子展示了一个简答的Servlet mapping过程
+```
+package org.eclipse.jetty.embedded;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+
+public class MinimalServlets
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server(8080);
+
+        // ServletHandler是最最最简单的方式去创建context handler
+        // 来返回一个Servlet实例
+        // 这个handler需要注册Servlet对象
+        ServletHandler handler = new ServletHandler();
+        server.setHandler(handler);
+
+        // 通过这个类 Jetty可以实例化一个Servlet实例并把它嵌入到给定的context path上
+
+        // 重要：
+        // 这是一个原生的Servlet
+        // 不是平常的那种被`@WebServlet`或者web.xml或者其他类似方式配置过的Servlet
+        handler.addServletWithMapping(HelloServlet.class, "/*");
+
+        // 开启
+        server.start();
+
+        // server.join()方法会让当前线程join并且wait
+        server.join();
+    }
+
+    @SuppressWarnings("serial")
+    public static class HelloServlet extends HttpServlet
+    {
+        @Override
+        protected void doGet( HttpServletRequest request,
+                              HttpServletResponse response ) throws ServletException,
+                                                            IOException
+        {
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("<h1>Hello from HelloServlet</h1>");
+        }
+    }
+}
+```
+
 <br>
-<span id="2127嵌入web应用程序"></span>
-##### 21.2.7、嵌入Web应用程序
+<span id="2126嵌入contexts"></span>
+##### 21.2.6、嵌入Contexts
 <br>
-<span id="2128像jettyxml一样进行嵌入式开发"></span>
-##### 21.2.8、像JettyXML一样进行嵌入式开发
+<span id="2127嵌入servletcontexts"></span>
+##### 21.2.7、嵌入ServletContexts
+<br>
+<span id="2128嵌入web应用程序"></span>
+##### 21.2.8、嵌入Web应用程序
+<br>
+<span id="2129像jettyxml一样进行嵌入式开发"></span>
+##### 21.2.9、像JettyXML一样进行嵌入式开发
 
 
 <br>
