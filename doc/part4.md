@@ -535,6 +535,85 @@ public class MinimalServlets
 <br>
 <span id="2126嵌入contexts"></span>
 ##### 21.2.6、嵌入Contexts
+
+一个`ContextHandler`是一个`ScopedHandler`，只有请求过来的URL前缀和我们设定的context path相匹配才会响应。请求匹配到它们对应的context path之后，会有它们对应的path方法，并且context范围内的资源是可用的，以下是可能的范围情况：
+
+- 当请求到某个context的时候，加载这个context的类加载器范围是可用的。
+- 通过`ServletContext`API设置的attribute集合都可用被使用。
+- 通过`ServletContext`API设置的paramenters集合都可用被使用。
+- 通过`ServletContext`API设置的用做静态资源请求的Resource库中的资源都可用被使用。
+- 虚拟机的名字集合都可用被使用。
+
+下面这个栗子就是通过包装`HelloHandler`来展示如何建立context：
+
+```
+package org.eclipse.jetty.embedded;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+
+public class OneContext
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server( 8080 );
+
+        // 在"/hello"上添加一个handler
+        ContextHandler context = new ContextHandler();
+        context.setContextPath( "/hello" );
+        context.setHandler( new HelloHandler() );
+
+        // 现在可以访问 http://localhost:8080/hello
+
+        server.setHandler( context );
+
+        // Start the server
+        server.start();
+        server.join();
+    }
+}
+```
+当有许多context的时候，你可以嵌入一个`ContextHandlerCollection`来有效地检查请求URI，然后选择匹配的ContextHandler来处理请求。下面这个栗子就是告诉你如何配置多少context：
+```
+package org.eclipse.jetty.embedded;
+
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+
+public class ManyContexts
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server(8080);
+
+        ContextHandler context = new ContextHandler("/");
+        context.setContextPath("/");
+        context.setHandler(new HelloHandler("Root Hello"));
+
+        ContextHandler contextFR = new ContextHandler("/fr");
+        contextFR.setHandler(new HelloHandler("Bonjoir"));
+
+        ContextHandler contextIT = new ContextHandler("/it");
+        contextIT.setHandler(new HelloHandler("Bongiorno"));
+
+        ContextHandler contextV = new ContextHandler("/");
+        contextV.setVirtualHosts(new String[] { "127.0.0.2" });
+        contextV.setHandler(new HelloHandler("Virtual Hello"));
+
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        contexts.setHandlers(new Handler[] { context, contextFR, contextIT,
+                contextV });
+
+        server.setHandler(contexts);
+
+        server.start();
+        server.join();
+    }
+}
+```
+
 <br>
 <span id="2127嵌入servletcontexts"></span>
 ##### 21.2.7、嵌入ServletContexts
