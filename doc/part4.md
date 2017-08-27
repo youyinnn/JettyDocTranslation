@@ -617,6 +617,43 @@ public class ManyContexts
 <br>
 <span id="2127嵌入servletcontexts"></span>
 ##### 21.2.7、嵌入ServletContexts
+
+`ServletContextHandler`的`ContextHandler`的一个重要子类，它支持标准的Servlet和sessions机制。接下来的栗子实例化了一个`DefaultServlet`来为/tmp/目录下的静态资源服务，还有一个`DumpServlet`，它负责创建session和传储请求中的一些基本细节：
+
+```
+package org.eclipse.jetty.embedded;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+
+public class OneServletContext
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server(8080);
+
+        ServletContextHandler context = new ServletContextHandler(
+                ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        context.setResourceBase(System.getProperty("java.io.tmpdir"));
+        server.setHandler(context);
+
+        // Add dump servlet
+        context.addServlet(DumpServlet.class, "/dump/*");
+        // Add default servlet
+        context.addServlet(DefaultServlet.class, "/");
+
+        server.start();
+        server.join();
+    }
+}
+```
+
+<br>
+
+> *译者文外补充：这里的`DumpServlet`只是示例，不是JettyAPI提供的实例。这里的`setResourceBase()`方法很重要，这跟我们一般使用Tomcat服务器，而我们的资源路径默认就是项目下的webapp目录是一样的，我们需要靠这个来设置Jetty，以达到同样的效果。*
+
 <br>
 <span id="2128嵌入web应用程序"></span>
 ##### 21.2.8、嵌入Web应用程序
