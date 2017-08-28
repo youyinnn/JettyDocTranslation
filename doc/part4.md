@@ -1024,15 +1024,13 @@ public class OneWebAppWithJsp
                 ManagementFactory.getPlatformMBeanServer() );
         server.addBean( mbContainer );
 
-        // The WebAppContext is the entity that controls the environment in
-        // which a web application lives and
-        // breathes. In this example the context path is being set to "/" so it
-        // is suitable for serving root context
-        // requests and then we see it setting the location of the war. A whole
-        // host of other configurations are
-        // available, ranging from configuring to support annotation scanning in
-        // the webapp (through
-        // PlusConfiguration) to choosing where the webapp will unpack itself.
+        // WebAppContext对象是用来控制它自己赖以生存的环境的。
+        // 在这个栗子里面，context path设置为“/”
+        // 这样它就可以处理根context下的请求了
+        // 我们还可以看到它设置了war的位置
+        // 整个host的其他配置都是可用的可配置的
+        // 你可用配置注解扫描的支持（需要通过PlusConfiguration）
+        // 还可用选择webapp在哪里自动解压
         WebAppContext webapp = new WebAppContext();
         webapp.setContextPath( "/" );
         File warFile = new File(
@@ -1045,26 +1043,24 @@ public class OneWebAppWithJsp
         webapp.setWar( warFile.getAbsolutePath() );
         webapp.setExtractWAR(true);
 
-        // This webapp will use jsps and jstl. We need to enable the
-        // AnnotationConfiguration in order to correctly
-        // set up the jsp container
+        // 这个webapp会使用jsp和jstl
+        // 我们需要激活AnnotationConfiguration
+        // 这样才能正确的设置jsp容器
         Configuration.ClassList classlist = Configuration.ClassList
                 .setServerDefault( server );
         classlist.addBefore(
                 "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
                 "org.eclipse.jetty.annotations.AnnotationConfiguration" );
 
-        // Set the ContainerIncludeJarPattern so that jetty examines these
-        // container-path jars for tlds, web-fragments etc.
-        // If you omit the jar that contains the jstl .tlds, the jsp engine will
-        // scan for them instead.
+        // 设置ContainerIncludeJarPattern
+        // 这样jetty才会去检查container path 的jar
+        // 这样才好为顶级域名以及web片段服务
+        // 如果你省略了包含jstl和域名的jar jsp引擎会来扫描它们
         webapp.setAttribute(
                 "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
                 ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$" );
 
-        // A WebAppContext is a ContextHandler as well so it needs to be set to
-        // the server so it is aware of where to
-        // send the appropriate requests.
+
         server.setHandler( webapp );
 
         // Configure a LoginService.
@@ -1082,17 +1078,30 @@ public class OneWebAppWithJsp
 
         // Start things up!
         server.start();
-
         server.dumpStdErr();
-
-        // The use of server.join() the will make the current thread join and
-        // wait until the server is done executing.
-        // See http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#join()
         server.join();
     }
 }
 ```
 
+你会用到的Maven依赖坐标：
+```
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-annotations</artifactId>
+  <version>${project.version}</version>
+</dependency>
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>apache-jsp</artifactId>
+  <version>${project.version}</version>
+</dependency>
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>apache-jstl</artifactId>
+  <version>${project.version}</version>
+</dependency>
+```
 
 [回到顶部](#top)
 - - -
