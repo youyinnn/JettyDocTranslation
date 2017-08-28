@@ -710,18 +710,81 @@ public class OneWebApp
 
 <br>
 
-> *译者文外补充：栗子中的JMX是一种额外组件，不是Jetty的服务。你可以准备一些war包自己测试。也可以不使用war包，直接使用有标准web应用布局的目录。*
+> *译者文外补充：栗子中的JMX是一种额外组件，不是Jetty的服务。你可以准备一些war包自己测试。也可以不使用war包，直接使用有标准web应用布局的目录。但是这里还遗留了一个问题，web项目中的servlet，在web.xml中配置是可行的，使用注解配置就不知道怎么在Jetty中实现了，栗子里面说使用`PlusConfiguration`，但是没有更加详细的说明。*
 
 <br>
 <span id="2129像jettyxml一样进行嵌入式开发"></span>
 ##### 21.2.9、像JettyXML一样进行嵌入式开发
 
+典型的Jetty服务器配置的做法是通过Jetty.xml文件进行配置。然而Jetty XML配置只是一个简单的渲染，它在起到配置作用的同时还向你展示了在代码里面是如何配置的。照着jetty.xml的做法，你很简单就可以在代码里面配置JettyServer。
+
+> *译者文外补充：文档后面这贴出了代码展示如何在代码像JettyXML配置一样做JettyServer的配置，这里对我的学习价值不大，所以我就不贴了，大家有兴趣自己去原文看。*
 
 <br>
 
 
 <span id="213嵌入式开发的栗子"></span>
 #### 21.3、嵌入式开发的栗子
+
+Jetty在各种各样的应用中有着非常丰富的嵌入式开发历史。这个部分我们会向你介绍一些简单应用的嵌入式开发的栗子。你也可以在我们的[git仓库](https://github.com/jetty-project?utf8=%E2%9C%93&q=&type=&language=)找到许多的Jetty嵌入式开发的示例项目。
+
+- 21.3.1、[简单的文件服务器](2131简单的文件服务器)
+- 21.3.2、
+- 21.3.3、
+- 21.3.4、
+- 21.3.5、
+- 21.3.6、
+- 21.3.7、
+- 21.3.8、
+
+
+<span id="2131简单的文件服务器"></span>
+##### 21.3.1、简单的文件服务器
+
+这个栗子展示了如何使用Jetty创建一个简单的文件服务器。这对于你想要一个具有获取文件功能的服务器来说是一个非常适合的栗子，它可以非常简单的就配置好并且为指定资源目录下的文件进行服务。你需要注意的是，这里没有任何的业务逻辑来做文件缓存，同样服务器设置和响应头里面也没有。
+
+```
+package org.eclipse.jetty.embedded;
+
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+
+/**
+ * Simple Jetty FileServer.
+ * This is a simple example of Jetty configured as a FileServer.
+ */
+public class FileServer
+{
+    public static void main(String[] args) throws Exception
+    {
+        Server server = new Server(8080);
+
+        // 创建ResoueceHandler
+        // 这个对象会处理对资源文件的请求
+        // 这是Jetty的Handler对象 所以它可以和其它Handler在一起做链式处理
+        ResourceHandler resource_handler = new ResourceHandler();
+
+        // 配置ResoueceHandler
+        // 设置资源的base来表明服务器要服务于哪个路径下的文件
+        // 本例是设置为当前目录 你可以设置jvm可以访问到的任何地方
+        resource_handler.setDirectoriesListed(true);
+        resource_handler.setWelcomeFiles(new String[]{ "index.html" });
+        resource_handler.setResourceBase(".");
+
+        // Add the ResourceHandler to the server.
+        HandlerList handlers = new HandlerList();
+        handlers.setHandlers(new Handler[] { resource_handler, new DefaultHandler() });
+        server.setHandler(handlers);
+
+        server.start();
+        server.join();
+    }
+}
+
+```
 
 [回到顶部](#top)
 - - -
