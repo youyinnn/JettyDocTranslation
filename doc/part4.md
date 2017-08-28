@@ -25,6 +25,13 @@
       - [嵌入Web应用程序](#2128嵌入web应用程序)
       - [像JettyXML一样进行嵌入式开发](#2129像jettyxml一样进行嵌入式开发)
     - [嵌入开发的栗子](#)
+      - [简单的文件服务器](#2131简单的文件服务器)
+      - [可分布的文件服务器](#2132可分布的文件服务器)
+      - [多Connectors](#2133多connectors)
+      - [安全方面Handler的Hello World](#2134安全方面handler的hello-world)
+      - [最简单的Servlet](#2135最简单的servlet)
+      - [Web Application](#2136web-application)
+      - [Web Application以及JSP](#2137web-application以及jsp)
   - 22. HTTP客户端（略）
   - 23. [Jetty和Maven](#)
     - [使用Maven](#)
@@ -728,18 +735,17 @@ public class OneWebApp
 
 Jetty在各种各样的应用中有着非常丰富的嵌入式开发历史。这个部分我们会向你介绍一些简单应用的嵌入式开发的栗子。你也可以在我们的[git仓库](https://github.com/jetty-project?utf8=%E2%9C%93&q=&type=&language=)找到许多的Jetty嵌入式开发的示例项目。
 
-- 21.3.1、[简单的文件服务器](2131简单的文件服务器)
-- 21.3.2、
-- 21.3.3、
-- 21.3.4、
-- 21.3.5、
-- 21.3.6、
-- 21.3.7、
-- 21.3.8、
-
+- 21.3.1、[简单的文件服务器](#2131简单的文件服务器)
+- 21.3.2、[可分布的文件服务器](#2132可分布的文件服务器)
+- 21.3.3、[多Connectors](#2133多connectors)
+- 21.3.4、[安全方面Handler的Hello World](#2134安全方面handler的hello-world)
+- 21.3.5、[最简单的Servlet](#2135最简单的servlet)
+- 21.3.6、[Web Application](#2136web-application)
+- 21.3.7、[Web Application以及JSP](#2137web-application以及jsp)
 
 <span id="2131简单的文件服务器"></span>
 ##### 21.3.1、简单的文件服务器
+
 
 这个栗子展示了如何使用Jetty创建一个简单的文件服务器。这对于你想要一个具有获取文件功能的服务器来说是一个非常适合的栗子，它可以非常简单的就配置好并且为指定资源目录下的文件进行服务。你需要注意的是，这里没有任何的业务逻辑来做文件缓存，同样服务器设置和响应头里面也没有。
 
@@ -783,8 +789,310 @@ public class FileServer
         server.join();
     }
 }
+```
+然后打开8080网页你就可以看到当前目录的情况了。
+
+这里你会使用到的Maven依赖坐标：
 
 ```
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-server</artifactId>
+  <version>${project.version}</version>
+</dependency>
+```
+
+> *译者文外补充：栗子中设置的index.html是来搞笑的，没什么卵用。当然如果你当前目录下有这个文件，代码里面就正好把这个文件配置为欢迎页面，但是即使你没使用代码设置为欢迎页面，只要你当前目录下有这个页面，也会默认刷这个页面，所以我建议目录下最好不要有index.html文件，然后`setWelcomeFiles(null)`，这样就会直接进入文件系统。*
+
+<br>
+
+<span id="2132可分布的文件服务器"></span>
+##### 21.3.2、可分布的文件服务器
+
+这个栗子是基于上栗来向你展示如何把多个`ResourceHandler`链式处理到一起，让你可以集中多个目录下的文件到一个context path下，还向你展示了如何使用`ContextHandlers`把这些path连在一起：
+
+```
+package org.eclipse.jetty.embedded;
+
+import java.io.File;
+
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.toolchain.test.MavenTestingUtils;
+import org.eclipse.jetty.util.resource.Resource;
+
+/**
+ * A {@link ContextHandlerCollection} handler may be used to direct a request to
+ * a specific Context. The URI path prefix and optional virtual host is used to
+ * select the context.
+ */
+public class SplitFileServer
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server();
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(8090);
+        server.setConnectors(new Connector[] { connector });
+
+        // 创建一个Context Handler 和ResourceHandler
+        // ContextHandler设置为“/” 但你可以设置其它你想要的路径
+        // 你需要注意的是我们设置ResourceBase使用的是maven testing utilities工具
+        // 来获取资源的目录 你可以不需要这样做 你可以简单的提供一个能找得到的路径就可以了
+        ResourceHandler rh0 = new ResourceHandler();
+
+        ContextHandler context0 = new ContextHandler();
+        context0.setContextPath("/");
+        File dir0 = MavenTestingUtils.getTestResourceDir("dir0");
+        context0.setBaseResource(Resource.newResource(dir0));
+        context0.setHandler(rh0);
+
+        // 重复上述的工作 指定一个不同的目录
+        ResourceHandler rh1 = new ResourceHandler();
+
+        ContextHandler context1 = new ContextHandler();
+        context1.setContextPath("/");
+        File dir1 = MavenTestingUtils.getTestResourceDir("dir1");
+        context1.setBaseResource(Resource.newResource(dir1));
+        context1.setHandler(rh1);
+
+        // 创建一个ContextHandlerCollection
+        // 把context handler 设置进去
+        // jetty程序会把context和对应的内容相匹配
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        contexts.setHandlers(new Handler[] { context0, context1 });
+
+        server.setHandler(contexts);
+
+        // Start things up!
+        server.start();
+
+        // 转储服务器状态
+        System.out.println(server.dump());
+        server.join();
+    }
+}
+```
+这里你会使用到的Maven依赖坐标：
+
+```
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-server</artifactId>
+  <version>${project.version}</version>
+</dependency>
+<dependency>
+  <groupId>org.eclipse.jetty.toolchain</groupId>
+  <artifactId>jetty-test-helper</artifactId>
+  <version>2.2</version>
+</dependency>
+```
+
+> *译者文外补充：熟悉handler的人马上就知道这些配置是怎么肥事了。里面还有个`server.dump()`我也不知道怎么肥事。*
+
+<br>
+
+<span id="2133多connectors"></span>
+##### 21.3.3、多Connectors
+
+这部分展示如何使用多连接来处理不同的请求，如http和https。
+
+> *译者文外补充：这部分我的学习需求不大，代码也就不贴了不翻译了，可能日后有需求了会再来补充的，大家有需要去的去参阅[原文](http://www.eclipse.org/jetty/documentation/9.4.6.v20170531/embedded-examples.html)。*
+
+<br>
+
+<span id="2134安全方面handler的hello-world"></span>
+##### 21.3.4、安全方面Handler的Hello World
+
+这个栗子展示了如何使用一个负责安全的handler来包装另外一个handler。这里有一个简单的Hello Handler，它返回一句问候语，但是在这之前你必须先通过身份验证。另一个需要注意的是这个栗子是使用的`ConstraintSecurityHandler`，它可以在servletAPI中提供安全映射支持，我们简单的展示了一下它的用法，但是`Constraint`还可以提供更强大的功能。如果你不需要，那么你可以不使用它而仅仅使用`SecurityHandler`。
+
+> *译者文外补充：这部分我的学习需求不大，代码也就不贴了不翻译了，可能日后有需求了会再来补充的，大家有需要去的去参阅[原文](http://www.eclipse.org/jetty/documentation/9.4.6.v20170531/embedded-examples.html)。*
+
+<br>
+
+<span id="2135最简单的servlet"></span>
+##### 21.3.5、最简单的Servlet
+
+这个栗子展示了最简单最简单的在Jetty中部署servlet的方式。你需要注意到的是，这里使用的是一个严格意义上的servlet，并不是web应用的context中的servlet，这种会在后面提到。这是一个单纯的servlet，它仅仅是部署和挂载在context上，让我们可以请求而已。这个栗子完美的展现了当你有一个简单的servlet，而你正需要对他进行单元测试的时候，你只需要把它挂载到context中，然后使用你最喜欢的http客户端库去发起请求。（可以参考Jetty的HTTP Client）
+
+```
+package org.eclipse.jetty.embedded;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+
+public class MinimalServlets
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server(8080);
+
+        ServletHandler handler = new ServletHandler();
+        server.setHandler(handler);
+
+        // 通过这个类实例你可以把servlet挂载到context里
+
+        // 重要:
+        // 这是一个原生的servlet，不是像以前那种被web.xml或者注解配置的servlet
+        handler.addServletWithMapping(HelloServlet.class, "/*");
+
+        server.start();
+        server.join();
+    }
+
+    @SuppressWarnings("serial")
+    public static class HelloServlet extends HttpServlet
+    {
+        @Override
+        protected void doGet( HttpServletRequest request,
+                              HttpServletResponse response ) throws ServletException,
+                                                            IOException
+        {
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println("<h1>Hello from HelloServlet</h1>");
+        }
+    }
+}
+```
+通过这个栗子，你可以非常简单的就配置一个servlet到http服务器中，作为简单的测试单元。
+
+这里你会使用到的Maven依赖坐标：
+```
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-servlet</artifactId>
+  <version>${project.version}</version>
+</dependency>
+```
+
+<span id="2136web-application"></span>
+##### 21.3.6、Web Application
+
+这里会向你展示如何使用一个嵌入式的Jetty服务器去部署一个简单的web应用。这对你想要以编程的方式管理服务器的生命周期非常有帮助，不管是生产项目或者是部署和调试一个完整规模的应用也好。当你控制住classpath之后，那么在许多方面，Jetty的这种部署方式要比传统的部署方式要简单得多。
+
+> *译者文外补充：这里贴的代码和[上面](#2128嵌入web应用程序)是一样的。*
+
+这里你会使用到的Maven依赖坐标：
+```
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-webapp</artifactId>
+  <version>${project.version}</version>
+</dependency>
+```
+
+<br>
+
+<span id="2137web-application以及jsp"></span>
+##### 21.3.7、Web Application以及JSP
+
+这个栗子和上一个栗子非常像，因为它只是支持了内嵌web应用可以使用jsp而已。从Jetty9.2以来，我们一直使用的是Apache的JSP引擎，这种做法需要`ServletContainerInitializer`去实例化它自己以支持Servlet3.1规范。为了让Jetty做到这些，你需要开启注解处理机制：
+
+```
+package org.eclipse.jetty.embedded;
+
+import java.io.File;
+import java.lang.management.ManagementFactory;
+
+import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.Configuration;
+import org.eclipse.jetty.webapp.WebAppContext;
+
+public class OneWebAppWithJsp
+{
+    public static void main( String[] args ) throws Exception
+    {
+        Server server = new Server( 8080 );
+
+        // Setup JMX
+        MBeanContainer mbContainer = new MBeanContainer(
+                ManagementFactory.getPlatformMBeanServer() );
+        server.addBean( mbContainer );
+
+        // The WebAppContext is the entity that controls the environment in
+        // which a web application lives and
+        // breathes. In this example the context path is being set to "/" so it
+        // is suitable for serving root context
+        // requests and then we see it setting the location of the war. A whole
+        // host of other configurations are
+        // available, ranging from configuring to support annotation scanning in
+        // the webapp (through
+        // PlusConfiguration) to choosing where the webapp will unpack itself.
+        WebAppContext webapp = new WebAppContext();
+        webapp.setContextPath( "/" );
+        File warFile = new File(
+                "../../jetty-distribution/target/distribution/demo-base/webapps/test.war" );
+        if (!warFile.exists())
+        {
+            throw new RuntimeException( "Unable to find WAR File: "
+                    + warFile.getAbsolutePath() );
+        }
+        webapp.setWar( warFile.getAbsolutePath() );
+        webapp.setExtractWAR(true);
+
+        // This webapp will use jsps and jstl. We need to enable the
+        // AnnotationConfiguration in order to correctly
+        // set up the jsp container
+        Configuration.ClassList classlist = Configuration.ClassList
+                .setServerDefault( server );
+        classlist.addBefore(
+                "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+                "org.eclipse.jetty.annotations.AnnotationConfiguration" );
+
+        // Set the ContainerIncludeJarPattern so that jetty examines these
+        // container-path jars for tlds, web-fragments etc.
+        // If you omit the jar that contains the jstl .tlds, the jsp engine will
+        // scan for them instead.
+        webapp.setAttribute(
+                "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
+                ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$" );
+
+        // A WebAppContext is a ContextHandler as well so it needs to be set to
+        // the server so it is aware of where to
+        // send the appropriate requests.
+        server.setHandler( webapp );
+
+        // Configure a LoginService.
+        // Since this example is for our test webapp, we need to setup a
+        // LoginService so this shows how to create a very simple hashmap based
+        // one. The name of the LoginService needs to correspond to what is
+        // configured in the webapp's web.xml and since it has a lifecycle of
+        // its own we register it as a bean with the Jetty server object so it
+        // can be started and stopped according to the lifecycle of the server
+        // itself.
+        HashLoginService loginService = new HashLoginService();
+        loginService.setName( "Test Realm" );
+        loginService.setConfig( "src/test/resources/realm.properties" );
+        server.addBean( loginService );
+
+        // Start things up!
+        server.start();
+
+        server.dumpStdErr();
+
+        // The use of server.join() the will make the current thread join and
+        // wait until the server is done executing.
+        // See http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#join()
+        server.join();
+    }
+}
+```
+
 
 [回到顶部](#top)
 - - -
