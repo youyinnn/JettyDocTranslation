@@ -42,17 +42,17 @@
 - - -
 <span id="21嵌入式开发"></span>
 ### 21、嵌入式开发
-  - [Jetty的嵌入式Hello World](#211jetty的嵌入式hello-world)
-    - [下载Jar包](#2111下载jar包)
-    - [Hello World栗子](#2112hello-world栗子)
-    - [编译Hello World栗子](#2113编译hello-world栗子)
-    - [运行Handler和Server](#2114运行handler和server)
-    - [下一步](#2115下一步)
-  - [Jetty的嵌入式开发](#)
-  - [嵌入开发的栗子](#)
+  - 21.1、[Jetty的嵌入式Hello World](#211jetty的嵌入式hello-world)
+  - 21.2、[Jetty的嵌入式开发](#212jetty的嵌入式开发)
+  - 21.3、[嵌入式开发的栗子](#213嵌入式开发的栗子)
 
 <span id="211jetty的嵌入式hello-world"></span>
 #### 21.1、Jetty的嵌入式HelloWorld
+- 21.1.1、[下载Jar包](#2111下载jar包)
+- 21.1.2、[Hello World栗子](#2112hello-world栗子)
+- 21.1.3、[编译Hello World栗子](#2113编译hello-world栗子)
+- 21.1.4、[运行Handler和Server](#2114运行handler和server)
+- 21.1.5、[下一步](#2115下一步)
 
 <span id="2111下载jar包"></span>
 ##### 21.1.1、下载Jar包
