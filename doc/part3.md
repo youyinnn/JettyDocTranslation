@@ -128,6 +128,64 @@ public class ServerWithAnnotations
 
 <span id="132使用注解"></span>
 ##### 13.2、使用注解
+- 13.2.1、[支持哪些注解](#1321支持哪些注解)
+- 13.2.2、[检测注解和自检注解的对比](#1322检测注解和自检注解的对比)
+- 13.2.3、[哪些jar包支持扫描检查注解的](#1323哪些jar包支持扫描检查注解的)
+- 13.2.4、[多线程注解扫描](#1324多线程注解扫描)
+- 13.2.5、[ServletContainerInitializers](#1325servletcontainerinitializers)
+
+<span id="132使用注解"></span>
+###### 13.2.1、支持哪些注解
+
+Jetty支持解释和运用的注解有：
+
+- @Resource
+- @Resources
+- @PostConstruct
+- @PreDestroy
+- @DeclaredRoles
+- @RunAs
+- @MultipartConfig
+- @WebServlet
+- @WebFilter
+- @WebListener
+- @WebInitParam
+- @ServletSecurity, @HttpConstraint, @HttpMethodConstraint
+- @HandlesTypes (on ServletContainerInitializers)
+
+<br>
+
+<span id="1322检测注解和自检注解的对比"></span>
+###### 13.2.2、检测注解和自检注解的对比
+
+一些类型的注解可以标注在任何类中，虽然这些注释并不一定能和容器或者框架产生直接交互作用。这些类型的注解我们称为“discovered（发现/检测）注释”，这代表容器或者框架需要主动的去检测这些注释。其它类型的注释我们称之为“introspected（自检）注释”，这意味着这种自检行为会发生在被容器或者框架的生命周期中直接作用的类上面（比如`javax.servlet.Servlet, javax.servlet.Filter`等等）因此可以通过对该类的简单的检测就可以找到。
+
+一些简单的“discovered”注释比如：
+- @WebServlet
+- @WebFilter
+- @WebListener
+
+一些简单的“introspected”注释比如：
+- @PostConstruct
+- @PreDestroy
+- @Resource
+
+<br>
+
+<span id="1323哪些jar包支持扫描检查注解的"></span>
+###### 13.2.3、哪些jar包支持扫描检查注解的
+<br>
+
+
+<span id="1324多线程注解扫描"></span>
+###### 13.2.4、多线程注解扫描
+<br>
+
+
+<span id="1325servletcontainerinitializers"></span>
+###### 13.2.5、ServletContainerInitializers
+
+<br>
 
 [回到顶部](#top)
 - - -
