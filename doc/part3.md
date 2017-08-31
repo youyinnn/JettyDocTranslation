@@ -158,7 +158,7 @@ Jetty支持解释和运用的注解有：
 <span id="1322检测注解和自检注解的对比"></span>
 ###### 13.2.2、检测注解和自检注解的对比
 
-一些类型的注解可以标注在任何类中，虽然这些注释并不一定能和容器或者框架产生直接交互作用。这些类型的注解我们称为“discovered（发现/检测）注释”，这代表容器或者框架需要主动的去检测这些注释。其它类型的注释我们称之为“introspected（自检）注释”，这意味着这种自检行为会发生在被容器或者框架的生命周期中直接作用的类上面（比如`javax.servlet.Servlet, javax.servlet.Filter`等等）因此可以通过对该类的简单的检测就可以找到。
+一些类型的注解可以标注在任何类中，虽然这些注释并不一定能和容器产生直接交互作用。这些类型的注解我们称为“discovered（发现/检测）注释”，这代表容器需要主动的去检测这些注释。其它类型的注释我们称之为“introspected（自检）注释”，这意味着这种自检行为会发生在被容器的生命周期中直接作用的类上面（比如`javax.servlet.Servlet, javax.servlet.Filter`等等）因此可以通过对该类的简单的检测就可以找到。
 
 一些简单的“discovered”注释比如：
 - @WebServlet
@@ -176,9 +176,40 @@ Jetty支持解释和运用的注解有：
 ###### 13.2.3、哪些jar包支持扫描检查注解的
 <br>
 
+web.xml文件可以包含`metadata-complete`属性。如果它的值为真，那么将不会扫描可检测的注释。然而，对类的扫描行为仍然会发生，因为有`javax.servlet.ServletContainerInitializer`。类一旦实现了这个接口，Jetty就会使用`javax.util.ServiceLoader`机制找到这个类，并且如果它里面有`@HandlesTypes`注释，那么jetty就必定会有层次地扫描这个类。如果你容器路径下或者`WEB-INF/lib`目录中包含了许多jar包的话，这样会非常消耗时间。
+
+如果扫描一旦发生，要么是你没指定`metadata-complete`或者指定为false，要么是存在一个或者多个`javax.servlet.ServletContainerInitializer`和`@HandlesTypes`，这样Jetty就必须兼顾容器的路径内容以及web应用的类路径内容。
+
+默认的情况下，Jetty不会扫描任何包含在容器类路径下的任何类。如果你需要扫描容器类路径下的类或者jar文件的话，你可以使用`org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern`，这是一个`WebAppContext`属性，可以为你想要扫描容器类路径下的jar或者目录指定匹配模式，好进行扫描行为。
+
+默认的情况下，Jetty会按照顺序扫描**所有**`WEB-INF/classes`下的类和**所有**`WEB-INF/lib`下的jar包，如果你有在web.xml下制定任何绝对的或者相对的条款顺序的话。如果你的web应用包含许多jar文件，你可以通过省略扫描这些jar包来显式的加速部署。为了做到这一点，你可以在`WebAppContext`中设置`org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern`属性，通过模式来定义你需要扫描的jar包。
+
+你需要注意到的是如果你有配置web应用的`extraClasspath`，那么它也会参与扫描过程。这里面的任何jar或者类都会像在`WEB-INF/classes`或者`WEB-INF/lib`中一样被扫描。
+
+如果你需要控制它们被应用到的顺序，你可以在[这里](#1325servletcontainerinitializers)了解到更多。
+
 
 <span id="1324多线程注解扫描"></span>
 ###### 13.2.4、多线程注解扫描
+
+如果要执行注释扫描，默认的情况下，Jetty会使用多线程的方式去实现，企图以最短的时间完成。
+
+如果处于某些原因你不想以多线程的方式扫描，你可以在Jetty中配置为单线程扫描。有以下几种方式：
+
+- Set the context attribute org.eclipse.jetty.annotations.multiThreaded to false
+- Set the Server attribute org.eclipse.jetty.annotations.multiThreaded to false
+- Set the System property org.eclipse.jetty.annotations.multiThreaded to false
+
+第一种只适用当前web应用，第二种适用所有部署在同一个server实例上的webapp，第三种适用所有在同一个JVM下部署的webapp。
+
+默认的情况下，Jetty会最大等待60秒来完成所有线程的扫描。你可以通过以下的设置来配置你想要的秒数：
+
+- Set the context attribute org.eclipse.jetty.annotations.maxWait
+- Set the Server attribute org.eclipse.jetty.annotations.maxWait
+- Set the System property org.eclipse.jetty.annotations.maxWait
+
+第一种只适用当前web应用，第二种适用所有部署在同一个server实例上的webapp，第三种适用所有在同一个JVM下部署的webapp。
+
 <br>
 
 
