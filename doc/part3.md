@@ -51,7 +51,7 @@ Jetty支持servlet规范的annotation。但是这默认是不开启的，所以�
 
 如果你是使用的Jetty发行版，那么注解是默认支持的。注解模块以及它所需要的过渡的依赖都是负责支持注解功能的。
 
-你需要注意的是注解功能依赖JNDI，比如`@Resource`和`@Resources`都是通过JNDI模块来实现的，JNDI模块是注解模块的过渡依赖模块。
+你需要注意的是，依赖JNDI的注解，比如`@Resource`和`@Resources`都是通过JNDI模块来实现的，JNDI模块是注解模块的过渡依赖模块。
 
 > *译者文外补充：Jetty发行版就是Jetty的客户端，与之相对的有Jetty嵌入式，我感觉文档是在强调这两个区别。*
 
