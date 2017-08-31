@@ -74,6 +74,7 @@ Jetty把整体分解为许多的jar包，我们可以按需导入依赖。典型
 > curl -o jetty-all-uber.jar http://central.maven.org/maven2/org/eclipse/jetty/aggregate/jetty-all/9.4.6.v20170531/jetty-all-9.4.6.v20170531-uber.jar
 ```
 
+[回到顶部](#top)
 <br>
 
 <span id="2112hello-world栗子"></span>
@@ -124,6 +125,7 @@ public class HelloWorld extends AbstractHandler
     }
 }
 ```
+[回到顶部](#top)
 <br>
 
 <span id="2113编译hello-world栗子"></span>
@@ -205,7 +207,9 @@ public class SimplestServer
 }
 ```
 这会在8080端口运行一个HTTP服务器，并且没有任何服务，任何请求都会是404。
+[回到顶部](#top)
 <br>
+
 <span id="2123使用handler"></span>
 ##### 21.2.3、使用Handler
   - 21.2.3.1、[一个Handler的Hello World](#21231一个handler的hello-world)
@@ -220,6 +224,9 @@ public class SimplestServer
 - 生成一个完整的HTTP响应
 - 调用另外一个Handler（参见API：[HandlerWrapper](http://www.eclipse.org/jetty/javadoc/9.4.6.v20170531/org/eclipse/jetty/server/handler/HandlerWrapper.html)）
 - 选择一个或多个Handler来调用（参见API：[HandlerCollection](http://www.eclipse.org/jetty/javadoc/9.4.6.v20170531/org/eclipse/jetty/server/handler/HandlerCollection.html)）
+
+[回到顶部](#top)
+<br>
 
 <span id="21231一个handler的hello-world"></span>
 ###### 21.2.3.1、一个Handler的Hello World
@@ -287,6 +294,9 @@ public class HelloHandler extends AbstractHandler
 
 handler可以在响应的body生成之前进行响应的status设置、content-type设置、把请求标记为已处理。
 
+[回到顶部](#top)
+<br>
+
 <span id="21232运行helloworldhandler"></span>
 ###### 21.2.3.2、运行HelloWorldHandler
 为了Handler能够处理HTTP请求，你必须把它添加到Server实例中，下面这个`OneHandler.java`代码就会向你展示Jetty服务器如何才能使用HelloWorldHandler：
@@ -316,6 +326,9 @@ public class OneHandler
 
 后面的部分会告诉你怎么才能把handlers连接起来组成一个切面，你可以在Jetty的`org.eclipse.jetty.server.handler`类中找到更多的有用的handlers实例。
 
+[回到顶部](#top)
+<br>
+
 <span id="21233handler-collections和wrappers"></span>
 ###### 21.2.3.3、Handler Collections和Wrappers
 
@@ -341,6 +354,7 @@ public class OneHandler
 
 > *译者文外补充：它是继承于`HandlerCollection`的，在其Javadoc中定义所描述：这个`HandlerCollection`的子类可以对contexts和这个容器里面包含的handlers基于context path和`ContextHandlers`类的关系生成一一对应的映射。contexts并不需要直接装进这个容器中，你只需要把handlers装进去就可以了。多个contexts可能会有一样的context path，它们会按照顺序被调用直到其中一个handler处理了这次请求。*
 
+[回到顶部](#top)
 <br>
 
 <span id="21234scoped-handlers"></span>
@@ -361,6 +375,7 @@ Server.handle(...)
 
 > *译者文外补充：`ServletHandler`和`ContextHandler`都是`ScopedHandler`的具体实现。*
 
+[回到顶部](#top)
 <br>
 
 <span id="21235resource-handler"></span>
@@ -418,8 +433,9 @@ public class FileServer
 ```
 你会注意到有一个HandlerList对象，里面链接了ResourceHandler和DefaultHandler，这样DefaultHandler会在访问到不存在资源的情况下生成404响应。
 
-
+[回到顶部](#top)
 <br>
+
 <span id="2124嵌入connectors"></span>
 ##### 21.2.4、嵌入Connectors
 - 21.2.4.1、[一个Connectors](#21241一个connectors)
@@ -466,6 +482,8 @@ public class OneConnector
 }
 ```
 上栗的connector可以处理HTTP协议的请求，这样的实现方式是`ServerConnector`类的默认方式是一样的。
+
+[回到顶部](#top)
 <br>
 
 <span id="21242多个connectors"></span>
@@ -477,7 +495,9 @@ public class OneConnector
 
 > *栗子描述原文：The ManyConnectors example, configures a server with two `ServerConnector` instances: the http connector has a `HTTPConnectionFactory` instance; the https connector has a `SslConnectionFactory` chained to a `HttpConnectionFactory`. Both `HttpConnectionFactory` are configured based on the same `HttpConfiguration` instance, however the HTTPS factory uses a wrapped configuration so that a `SecureRequestCustomizer` can be added.*
 
+[回到顶部](#top)
 <br>
+
 <span id="2125嵌入servlets"></span>
 ##### 21.2.5、嵌入Servlets
 
@@ -539,7 +559,9 @@ public class MinimalServlets
 }
 ```
 
+[回到顶部](#top)
 <br>
+
 <span id="2126嵌入contexts"></span>
 ##### 21.2.6、嵌入Contexts
 
@@ -621,7 +643,9 @@ public class ManyContexts
 }
 ```
 
+[回到顶部](#top)
 <br>
+
 <span id="2127嵌入servletcontexts"></span>
 ##### 21.2.7、嵌入ServletContexts
 
@@ -661,7 +685,9 @@ public class OneServletContext
 
 > *译者文外补充：这里的`DumpServlet`只是示例，不是JettyAPI提供的实例。这里的`setResourceBase()`方法很重要，这跟我们一般使用Tomcat服务器，而我们的资源路径默认就是项目下的webapp目录是一样的，我们需要靠这个来设置Jetty，以达到同样的效果。*
 
+[回到顶部](#top)
 <br>
+
 <span id="2128嵌入web应用程序"></span>
 ##### 21.2.8、嵌入Web应用程序
 
@@ -808,6 +834,7 @@ public class FileServer
 
 > *译者文外补充：栗子中设置的index.html是来搞笑的，没什么卵用。当然如果你当前目录下有这个文件，代码里面就正好把这个文件配置为欢迎页面，但是即使你没使用代码设置为欢迎页面，只要你当前目录下有这个页面，也会默认刷这个页面，所以我建议目录下最好不要有index.html文件，然后`setWelcomeFiles(null)`，这样就会直接进入文件系统。*
 
+[回到顶部](#top)
 <br>
 
 <span id="2132可分布的文件服务器"></span>
@@ -899,6 +926,7 @@ public class SplitFileServer
 
 > *译者文外补充：熟悉handler的人马上就知道这些配置是怎么肥事了。里面还有个`server.dump()`我也不知道怎么肥事。*
 
+[回到顶部](#top)
 <br>
 
 <span id="2133多connectors"></span>
@@ -908,6 +936,7 @@ public class SplitFileServer
 
 > *译者文外补充：这部分我的学习需求不大，代码也就不贴了不翻译了，可能日后有需求了会再来补充的，大家有需要去的去参阅[原文](http://www.eclipse.org/jetty/documentation/9.4.6.v20170531/embedded-examples.html)。*
 
+[回到顶部](#top)
 <br>
 
 <span id="2134安全方面handler的hello-world"></span>
@@ -917,6 +946,7 @@ public class SplitFileServer
 
 > *译者文外补充：这部分我的学习需求不大，代码也就不贴了不翻译了，可能日后有需求了会再来补充的，大家有需要去的去参阅[原文](http://www.eclipse.org/jetty/documentation/9.4.6.v20170531/embedded-examples.html)。*
 
+[回到顶部](#top)
 <br>
 
 <span id="2135最简单的servlet"></span>
@@ -982,6 +1012,9 @@ public class MinimalServlets
 </dependency>
 ```
 
+[回到顶部](#top)
+<br>
+
 <span id="2136web-application"></span>
 ##### 21.3.6、Web Application
 
@@ -998,6 +1031,7 @@ public class MinimalServlets
 </dependency>
 ```
 
+[回到顶部](#top)
 <br>
 
 <span id="2137web-application以及jsp"></span>
