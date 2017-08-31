@@ -717,7 +717,9 @@ public class OneWebApp
 
 <br>
 
-> *译者文外补充：栗子中的JMX是一种额外组件，不是Jetty的服务。你可以准备一些war包自己测试。也可以不使用war包，直接使用有标准web应用布局的目录。但是这里还遗留了一个问题，web项目中的servlet，在web.xml中配置是可行的，使用注解配置就不知道怎么在Jetty中实现了，栗子里面说使用`PlusConfiguration`，但是没有更加详细的说明。*
+> *译者文外补充：栗子中的JMX是一种额外组件，不是Jetty的服务。你可以准备一些war包自己测试。也可以不使用war包，直接使用有标准web应用布局的目录。如果你想要Jetty支持Servlet注解配置，你可以在[这里]()了解到更多。*
+
+
 
 <br>
 <span id="2129像jettyxml一样进行嵌入式开发"></span>

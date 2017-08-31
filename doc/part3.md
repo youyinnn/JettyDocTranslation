@@ -422,5 +422,11 @@ public class AnnotationTest extends HttpServlet
 }
 ```
 
+> *译者文外补充：在Jetty中使用注释很重要的一点就是，Jetty会扫描类路径下的.class文件，也即编译结果，以及项目lib中的jar文件，除此之外不会扫描其它地方。所以在使用编译器开发的时候，要详细设置好类路径。*
+
+![ServletAnnontationExp](https://github.com/youyinnn/JettyDocTranslation/raw/master/doc/img/ServletAnnontationExp.png)
+
+> *译者文外补充：如上图所示，我使用idea配置，我的war路径为src路径，但是在IDEA开发中，编译结果是在out目录下的，所以我设置了一个额外的类路径，将编译出的类结果加入到classpath中，这样我就可以扫描这下面的class，也就能扫描其中的注释了。我框出来的日志表明确实是有class被扫描到了并且有耗时结果，如果耗时结果为0的话，肯定是类路径设置错了。*
+
 [回到顶部](#top)
 - - -
