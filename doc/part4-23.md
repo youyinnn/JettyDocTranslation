@@ -2,7 +2,25 @@
 ### Ⅳ. Jetty开发指南-23.Jetty和Maven
 - 23. [Jetty和Maven](#23jetty和maven)
   - [使用Maven](#231使用maven)
+    - [使用Maven做嵌入式Jetty开发](#2311使用maven做嵌入式jetty开发)
+    - [使用Maven开发标准的WebApp](#2321使用maven开发标准的wabapp)
   - [配置Jetty的Maven插件](#232配置jetty的maven插件)
+    - [快速开始](#2321快速开始)
+    - [支持目标](#2322支持目标)
+    - [配置Jetty容器](#2323配置jetty容器)
+    - [配置你的WebApp](#2324配置你的webapp)
+    - [jetty:run](#2325jettyrun)
+    - [jetty:run-war](#2326jettyrunwar)
+    - [jetty:run-exploded](#2327jettyrunexploded)
+    - [jetty:run-forked](#2328jettyrunforked)
+    - [jetty:start](#2329jettystart)
+    - [jetty:stop](#23210jettystop)
+    - [jetty:effective-web-xml](#23211jettyeffectivewebxml)
+    - [使用覆盖war](#23212使用覆盖war)
+    - [配置Security](#23213配置security)
+    - [使用多个WebappRoot目录](#23214使用多个webapproot目录)
+    - [运行一个以上的Webapp](#23215运行一个以上的webapp)
+    - [设置系统属性](#23216设置系统属性)
   - [Jetty Maven插件的文件扫描](#233jetty-maven插件的文件扫描)
   - [Jetty Jspc Maven插件](#234jetty-jspc-maven插件)
 
@@ -298,19 +316,71 @@ public class HelloServlet extends HttpServlet
 生产的war文件会在target目录，并且它可以部署在任何的标准servlet服务器，包括Jetty。
 
 [回到顶部](#top)
-<br>
+- - -
 
 <span id="232配置jetty的maven插件"></span>
 #### 23.2、配置Jetty的Maven插件
 
-[回到顶部](#top)
+- 23.2.1、[快速开始](#2321快速开始)
+- 23.2.2、[支持目标](#2322支持目标)
+- 23.2.3、[配置Jetty容器](#2323配置jetty容器)
+- 23.2.4、[配置你的WebApp](#2324配置你的webapp)
+- 23.2.5、[jetty:run](#2325jettyrun)
+- 23.2.6、[jetty:run-war](#2326jettyrunwar)
+- 23.2.7、[jetty:run-exploded](#2327jettyrunexploded)
+- 23.2.8、[jetty:run-forked](#2328jettyrunforked)
+- 23.2.9、[jetty:start](#2329jettystart)
+- 23.2.10、[jetty:stop](#23210jettystop)
+- 23.2.11、[jetty:effective-web-xml](#23211jettyeffectivewebxml)
+- 23.2.12、[使用覆盖war](#23212使用覆盖war)
+- 23.2.13、[配置Security](#23213配置security)
+- 23.2.14、[使用多个WebappRoot目录](#23214使用多个webapproot目录)
+- 23.2.15、[运行一个以上的Webapp](#23215运行一个以上的webapp)
+- 23.2.16、[设置系统属性](#23216设置系统属性)
+
+Maven里的Jetty插件对于快速开发和快速测试来说是非常有用的。你可以把它添加到任意一个webapp项目中，只要这个项目的结构符合Maven标准。插件会定期的扫描你的项目的变化，并且自动的重新部署项目。这让生产周期大大缩减，因为你不用做部署和构建的步骤：你只需要在IDE里面做出修改，然后运行的web容器会自动地重新部署这些修改，所以在这样的情况下，你可以非常直接地做测试工作。
+
+> **重要：**
+>
+> 你需要Maven3.3以上才能支持这个插件。
+
+虽然Maven的Jetty插件可以非常有效地进行开发，但是我们并不推荐把它运用到生产环境。因为Maven插件的运作本身需要许多内置Maven API，并且Maven它本身并不是一个生产部署工具。我们还是推荐你使用传统的开发版部署方法或者使用嵌入式Jetty。
+
 <br>
+
+<span id="2321快速开始"></span>
+##### 23.2.1、快速开始
+
+首先，在pom中配置插件：
+```
+<plugin>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-maven-plugin</artifactId>
+  <version>9.4.6.v20170531</version>
+</plugin>
+```
+然后在和pom同级的目录下，执行以下命令：
+```
+mvn jetty:run
+```
+然后你可以在`http://localhost:8080/`访问你的项目。
+
+Jetty会一直执行下去直到你停止它。当它在运行的时候，它会定期扫描你项目文件是否有变动，如果文件有变动并且重编译了成class文件的话，Jetty会重新部署你的项目，然后你可以直接测试你刚才的变更结果。
+
+你可以在终端窗口使用`ctrl-c`热键来终止这个插件的运行。
+
+> **注意：**
+>
+> 运行Jetty实例的类路径和它下面部署的web应用都是通过Maven来管理的，这可能和你期待的有点不同。比如说：一个web应用的依赖jar可能会引用本地maven仓库中的版本，而不是WEB-INF/lib目录下的jar包。
+
+[回到顶部](#top)
+- - -
 
 <span id="233jetty-maven插件的文档扫描"></span>
 #### 23.3、Jetty Maven插件的文件扫描
 
 [回到顶部](#top)
-<br>
+- - -
 
 <span id="234jetty-jspc-maven插件"></span>
 #### 23.4、Jetty Jspc Maven插件
