@@ -32,13 +32,6 @@
       - [最简单的Servlet](#2135最简单的servlet)
       - [Web Application](#2136web-application)
       - [Web Application以及JSP](#2137web-application以及jsp)
-  - 22. HTTP客户端（略）
-  - 23. [Jetty和Maven](#23jetty和maven)
-    - [使用Maven](#231使用maven)
-    - [配置Jetty的Maven插件](#232配置jetty的maven插件)
-    - [Jetty Maven插件的文件扫描](#233jetty-maven插件的文件扫描)
-    - [Jetty Jspc Maven插件](#234jetty-jspc-maven插件)
-  - 后略
 - - -
 <span id="21嵌入式开发"></span>
 ### 21、嵌入式开发
@@ -1140,40 +1133,6 @@ public class OneWebAppWithJsp
   <version>${project.version}</version>
 </dependency>
 ```
-
-[回到顶部](#top)
-- - -
-
-<span id="23jetty和maven"></span>
-### 23、Jetty和Maven
-
-- 23.1、[使用Maven](#231使用maven)
-- 23.2、[配置Jetty的Maven插件](#232配置jetty的maven插件)
-- 23.3、[Jetty Maven插件的文件扫描](#233jetty-maven插件的文档扫描)
-- 23.4、[Jetty Jspc Maven插件](#234jetty-jspc-maven插件)
-
-<span id="231使用maven"></span>
-#### 23.1、使用Maven
-
-
-
-[回到顶部](#top)
-<br>
-
-<span id="232配置jetty的maven插件"></span>
-#### 23.2、配置Jetty的Maven插件
-
-[回到顶部](#top)
-<br>
-
-<span id="233jetty-maven插件的文档扫描"></span>
-#### 23.3、Jetty Maven插件的文件扫描
-
-[回到顶部](#top)
-<br>
-
-<span id="234jetty-jspc-maven插件"></span>
-#### 23.4、Jetty Jspc Maven插件
 
 [回到顶部](#top)
 - - -
