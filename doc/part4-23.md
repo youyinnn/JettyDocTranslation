@@ -338,13 +338,13 @@ public class HelloServlet extends HttpServlet
 - 23.2.15、[运行一个以上的Webapp](#23215运行一个以上的webapp)
 - 23.2.16、[设置系统属性](#23216设置系统属性)
 
-Maven里的Jetty插件对于快速开发和快速测试来说是非常有用的。你可以把它添加到任意一个webapp项目中，只要这个项目的结构符合Maven标准。插件会定期的扫描你的项目的变化，并且自动的重新部署项目。这让生产周期大大缩减，因为你不用做部署和构建的步骤：你只需要在IDE里面做出修改，然后运行的web容器会自动地重新部署这些修改，所以在这样的情况下，你可以非常直接地做测试工作。
+Jetty Maven插件插件对于快速开发和快速测试来说是非常有用的。你可以把它添加到任意一个webapp项目中，只要这个项目的结构符合Maven标准。插件会定期的扫描你的项目的变化，并且自动的重新部署项目。这让生产周期大大缩减，因为你不用做部署和构建的步骤：你只需要在IDE里面做出修改，然后运行的web容器会自动地重新部署这些修改，所以在这样的情况下，你可以非常直接地做测试工作。
 
 > **重要：**
 >
 > 你需要Maven3.3以上才能支持这个插件。
 
-虽然Maven的Jetty插件可以非常有效地进行开发，但是我们并不推荐把它运用到生产环境。因为Maven插件的运作本身需要许多内置Maven API，并且Maven它本身并不是一个生产部署工具。我们还是推荐你使用传统的开发版部署方法或者使用嵌入式Jetty。
+虽然Jetty Maven插件可以非常有效地进行开发，但是我们并不推荐把它运用到生产环境。因为Maven插件的运作本身需要许多内置Maven API，并且Maven它本身并不是一个生产部署工具。我们还是推荐你使用传统的开发版部署方法或者使用嵌入式Jetty。
 
 <br>
 
@@ -374,6 +374,146 @@ Jetty会一直执行下去直到你停止它。当它在运行的时候，它会
 > 运行Jetty实例的类路径和它下面部署的web应用都是通过Maven来管理的，这可能和你期待的有点不同。比如说：一个web应用的依赖jar可能会引用本地maven仓库中的版本，而不是WEB-INF/lib目录下的jar包。
 
 [回到顶部](#top)
+<br>
+
+<span id="2322支持目标"></span>
+##### 23.2.2、支持目标
+
+Jetty Maven插件有大量的Maven目标。这其中最有用的目标就是run目标，它可以运行一个未装配的webapp。还有其它的目标，可以帮助你完成不同的任务。比如说，你可能需要在另外一个Jetty的实例上运行你的webapp而不是就在当前的maven进程里面运行；或者你可能需要在你想部署的webapp上，对项目的生命周期的各个阶段进行更细致粒度的控制。
+
+Maven中有很多目标都可以完成这些任务，你可以通过命令来查看Jetty Maven插件支持哪些目标：
+```
+mvn jetty:help
+```
+
+为了看到更多详细信息，你可以传入特定目标的名字：
+```
+mvn jetty:help -Ddetail=true -Dgoal= <goal name>
+```
+[回到顶部](#top)
+<br>
+
+<span id="2323配置jetty容器"></span>
+##### 23.2.3、配置Jetty容器
+
+- httpConnector
+  可选项。如果没有指定，Jetty会创建一个`ServerConnector`实例来监听8080端口。你可以通过命令行在启动的时候更改这些默认的设置，比如说`mvn -Djetty.http.port=9999 jetty:run`。除此之外，你可以使用配置对象来设置`ServerConnector`信息。以下是可配置的子对象：
+  - port：
+    - 可修改的端口号，默认是8080。
+  - host：
+    - 特定的connector接口，默认是所有接口。
+  - name：
+    - connector的名字。
+  - idleTimeout：
+    - 最大等待连接时间。
+  - soLinger：
+    - socket的延迟时间。
+
+示例：
+```
+<plugin>
+    <groupId>org.eclipse.jetty</groupId>
+    <artifactId>jetty-maven-plugin</artifactId>
+    <version>${jetty-version}</version>
+    <configuration>
+        <httpConnector>
+            <port>8888</port>
+        </httpConnector>
+    </configuration>
+</plugin>
+```
+
+<br>
+
+- jettyXml
+  可选项。这里可以配置你需要加载的jetty的xml文件，需要用逗号分开。
+
+示例：
+```
+<plugin>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-maven-plugin</artifactId>
+  <version>9.4.6.v20170531</version>
+  <configuration>
+    <jettyXml>jetty.xml,jetty-ssl.xml,jetty-https.xml</jettyXml>
+  </configuration>
+</plugin>
+```
+
+<br>
+
+- scanIntervalSeconds
+  扫描和检查webapp变更的时间间隔，这可以用来做自动的热部署。默认情况下为0，意思是不开启热部署，取一个大于1 的值就开启了热部署。
+
+<br>
+
+- reload
+  默认值是“automatic”，也就是自动的，只要你配置了一个非0的`scanIntervalSeconds`。你可以设置为“manual”，也就是手动的，这时你需要手动触发扫描，你得在插件运行的情况下在控制台键入一个换行键。这对于你在做一些重要的变更的时候比较有用。
+
+<br>
+
+- dumpOnStart
+  可选项。默认是false。如果为true，Jetty会在启动的时候转储出服务器结构。
+
+<br>
+
+> *译者文外补充：后面的部分我感觉配置不上，也就不翻译了。*
+
+- loginServices
+  Optional. A list of org.eclipse.jetty.security.LoginService implementations. Note that there is no default realm. If you use a realm in your web.xml you can specify a corresponding realm here. You could instead configure the login services in a jetty xml file and add its location to the jettyXml parameter.
+
+<br>
+
+- requestLog
+  Optional. An implementation of the org.eclipse.jetty.server.RequestLog request log interface. An implementation that respects the NCSA format is available as org.eclipse.jetty.server.NCSARequestLog. There are three other ways to configure the RequestLog:
+
+  - In a jetty xml config file, as specified in the jettyXml parameter.
+  - In a context xml config file, as specified in the contextXml parameter.
+  - In the webApp element.
+  See Configuring Request Logs for more information.
+
+<br>
+
+- server
+  Optional as of Jetty 9.3.1. This would configure an instance of the org.eclipse.jetty.server.Server for the plugin to use, however it is usually NOT necessary to configure this, as the plugin will automatically configure one for you. In particular, if you use the jettyXml element, then you generally DON’T want to define this element, as you are probably using the jettyXml file to configure up a Server with a special constructor argument, such as a custom threadpool. If you define both a server element AND use a jetty xml element which points to a config file that has a line like <Configure id="Server" class="org.eclipse.jetty.server.Server"> then the the xml configuration will override what you configure for the server in the pom.xml.
+
+<br>
+
+- stopPort
+  Optional. Port to listen on for stop commands. Useful to use in conjunction with the stop or run-forked goals.
+
+<br>
+
+- stopKey
+  Optional. Used in conjunction with stopPort for stopping jetty. Useful when used in conjunction with the stop or run-forked goals.
+
+<br>
+
+- systemProperties
+  Optional. Allows you to configure System properties for the execution of the plugin. For more information, see Setting System Properties.
+
+<br>
+
+- systemPropertiesFile
+  Optional. A file containing System properties to set for the execution of the plugin. By default, settings that you make here do not override any system properties already set on the command line, by the JVM, or in the POM via systemProperties. Read Setting System Properties for how to force overrides.
+
+<br>
+
+- skip
+  Default is false. If true, the execution of the plugin exits. Same as setting the SystemProperty -Djetty.skip on the command line. This is most useful when configuring Jetty for execution during integration testing and you want to skip the tests.
+
+<br>
+
+- useProvidedScope
+  Default value is false. If true, the dependencies with <scope>provided</scope> are placed onto the container classpath. Be aware that this is NOT the webapp classpath, as "provided" indicates that these dependencies would normally be expected to be provided by the container. You should very rarely ever need to use this. Instead, you should copy the provided dependencies as explicit dependencies of the plugin instead.
+
+<br>
+
+- excludedGoals
+  Optional. A list of Jetty plugin goal names that will cause the plugin to print an informative message and exit. Useful if you want to prevent users from executing goals that you know cannot work with your project.
+
+<br>
+
 - - -
 
 <span id="233jetty-maven插件的文档扫描"></span>
